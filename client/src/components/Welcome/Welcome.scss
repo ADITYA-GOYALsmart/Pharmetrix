@@ -1,0 +1,201 @@
+@use 'sass:color';
+@use '../../styles/variables' as *;
+@use '../../styles/animations';
+
+.welcome-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, $primary-dark, $primary, $primary-light);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  
+  .animated-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba($secondary, 0.3) 0%, rgba($secondary, 0) 70%);
+      width: 300px;
+      height: 300px;
+      filter: blur(30px);
+    }
+  }
+  
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    width: 90%;
+    padding: 3rem;
+    text-align: center;
+    
+    @media (max-width: $tablet) {
+      padding: 2rem 1rem;
+    }
+  }
+  
+  .logo-container {
+    margin-bottom: 2rem;
+    
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba($secondary, 0.8), rgba($primary-light, 0.8));
+      padding: 1rem 2rem;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba($accent-light, 0.25);
+      backdrop-filter: blur(12px);
+      
+      .pill-icon {
+        font-size: 2.5rem;
+        margin-right: 1rem;
+        animation: float 6s ease-in-out infinite;
+        filter: drop-shadow(0 6px 12px rgba($accent, 0.5));
+      }
+      
+      .logo-text {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, $text-light, $accent-light);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 20px rgba($accent-light, 0.25);
+      }
+    }
+  }
+  
+  h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(to right, $text-light, $accent-light);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    @media (max-width: $tablet) {
+      font-size: 2.5rem;
+    }
+  }
+  
+  .tagline {
+    margin-bottom: 3rem;
+    
+    p {
+      font-size: 1.5rem;
+      color: rgba($text-light, 0.8);
+      
+      @media (max-width: $tablet) {
+        font-size: 1.2rem;
+      }
+    }
+  }
+  
+  .coming-soon {
+    margin-bottom: 4rem;
+    
+    .badge {
+      display: inline-block;
+      background: $accent;
+      color: $text-light;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 5px 15px rgba($accent, 0.4);
+      animation: pulse 3s ease-in-out infinite;
+      
+      span {
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+      }
+    }
+    
+    p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 1rem;
+      color: rgba($text-light, 0.9);
+    }
+  }
+  
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+    
+    @media (max-width: $large-desktop) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (max-width: $tablet) {
+      grid-template-columns: 1fr;
+    }
+    
+    .feature {
+      background: linear-gradient(180deg, rgba($primary, 0.6), rgba($primary-light, 0.4));
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      border: 1px solid rgba($secondary, 0.35);
+      position: relative;
+      overflow: hidden;
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba($accent-light, 0.15), transparent 40%);
+        transition: opacity 0.3s ease;
+      }
+      
+      &:hover {
+        transform: translateY(-10px) scale(1.01);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        border-color: $accent-light;
+      }
+
+      &:hover::after { opacity: 1; }
+      
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1.25rem;
+        filter: drop-shadow(0 10px 20px rgba($accent, 0.35));
+      }
+      
+      .feature-text {
+        h3 {
+          font-size: 1.5rem;
+          margin-bottom: 0.75rem;
+          color: $accent-light;
+        }
+        
+        p {
+          font-size: 1rem;
+          color: rgba($text-light, 0.85);
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  .footer {
+    color: rgba($text-light, 0.6);
+    font-size: 0.9rem;
+  }
+}
