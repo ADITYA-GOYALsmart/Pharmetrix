@@ -3,8 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User, { IUser } from "../mongodb/schematics/User";
 import { generateISTTimestamp, jwtKey } from "../app.config";
-import { sendWelcomeEmail, sendLoginEmail } from "../services/email.service";
-import { NotificationType } from "../mongodb/schematics/Notifications";
 
 export const signup = async (
   req: Request,
@@ -47,7 +45,6 @@ export const signup = async (
     );
 
     const signupTime = generateISTTimestamp();
-    await sendWelcomeEmail(fullName, email, signupTime, NotificationType.Auth);
 
     // Remove sensitive info before sending response
     const { password: _, ...userWithoutPassword } = newUser.toObject();
@@ -87,12 +84,6 @@ export const login = async (
     const token = jwt.sign({ email, id: user._id }, jwtKey, jwtOptions);
     const loginTime = generateISTTimestamp();
 
-    await sendLoginEmail(
-      user.fullName,
-      email,
-      loginTime,
-      NotificationType.Auth
-    );
 
     // Remove sensitive info before sending response
     const { password: _, ...userWithoutPassword } = user.toObject();
