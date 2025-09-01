@@ -1,12 +1,15 @@
-// Color scheme - Purple/Blue with Red accents
-$primary-dark: #1a1a2e;
-$primary: #16213e;
-$primary-light: #0f3460;
-$secondary: #533483;
-$accent: #e94560;
-$accent-light: #ff758f;
-$text-light: #f5f5f5;
-$text-dark: #333;
+// Color scheme - SPIS Revamp (Indigo / Aqua / Emerald on Off-White)
+$primary-dark: #283593; // Dark Indigo
+$primary: #283593; // Primary Indigo
+$primary-light: #3F51B5; // Lighter Indigo for gradients/cards
+$secondary: #29B6F6; // Aqua Blue
+$accent: #2E7D32; // Emerald Green
+$accent-light: #66BB6A; // Lighter Emerald for hovers/highlights
+$text-light: #ffffff; // on dark/primary surfaces
+$text-dark: #1F2937; // Slate-like dark for light backgrounds
+
+// Background
+$background: #F5F5F5;
 
 // Breakpoints
 $mobile: 576px;

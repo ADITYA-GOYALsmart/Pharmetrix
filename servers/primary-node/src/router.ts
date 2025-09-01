@@ -8,6 +8,7 @@ import { requireOrgRole } from "./middleware/rbac.middleware";
 import { createOrganization, addUserToOrganization, getInventory } from "./controllers/org.controller";
 import { addMedicine, sellMedicine, discardBatch, markExpiredBatches } from "./controllers/inventory.controller";
 import { getStockSummary, getLowStock } from "./controllers/reports.controller";
+import { submitContact } from "./controllers/contact.controller";
 
 export const router = express.Router();
 
@@ -18,6 +19,9 @@ router.get('/', (req, res) => {
 router.get('/ping', (req, res) => {
   res.status(200).send('pong');
 });
+
+// Public contact route for landing page
+router.post('/contact', submitContact);
 
 router.post('/signup', signup);
 router.post('/login', login);
