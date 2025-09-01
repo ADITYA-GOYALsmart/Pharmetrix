@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
@@ -12,8 +12,23 @@ const stagger = {
   show: { transition: { staggerChildren: 0.08 } }
 }
 
+// Small hook to detect mobile viewport width
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < breakpoint : false)
+  
+  // Update on resize
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [breakpoint])
+
+  return isMobile
+}
+
 export default function Auth() {
   const [mode, setMode] = useState<'signup' | 'login'>('signup')
+  const isMobile = useIsMobile(768)
 
   return (
     <main style={pageWrap} aria-labelledby="auth-title">
@@ -22,39 +37,39 @@ export default function Auth() {
       <div style={bgAccentLeft} />
       <div style={bgAccentRight} />
 
-      <div style={contentWrap}>
+      <div style={{ ...contentWrap, ...(isMobile ? contentWrapMobile : null) }}>
         {/* Left promo */}
         <motion.div
           variants={fadeUp}
           initial="hidden"
           animate="show"
-          style={promoPane}
+          style={{ ...promoPane, ...(isMobile ? promoPaneMobile : null) }}
         >
           <div style={logoTile}>
             <img src="/title-logo.png" alt="Pharmetrix" style={{ height: 36 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
           </div>
-          <motion.h1 id="auth-title" style={promoTitle}>
+          <motion.h1 id="auth-title" style={{ ...promoTitle, ...(isMobile ? promoTitleMobile : null) }}>
             Manage stock. Monitor storage. Sell with confidence.
           </motion.h1>
-          <motion.p style={promoText}>
+          <motion.p style={{ ...promoText, ...(isMobile ? { textAlign: 'center' } : null) }}>
             A unified platform for inventory, POS, real‑time monitoring, and edge intelligence—built for modern pharmacies.
           </motion.p>
 
-          <motion.ul variants={stagger} initial="hidden" animate="show" style={promoList}>
+          <motion.ul variants={stagger} initial="hidden" animate="show" style={{ ...promoList, ...(isMobile ? promoListMobile : null) }}>
             {[
               'Barcode scanning & POS receipts',
               '24/7 temperature & humidity tracking',
               'Automated alerts and expiry management',
               'Optional computer vision & live streaming'
             ].map((item) => (
-              <motion.li key={item} variants={fadeUp} style={promoListItem}>
+              <motion.li key={item} variants={fadeUp} style={{ ...promoListItem, ...(isMobile ? { justifyContent: 'center' } : null) }}>
                 <span style={checkIcon}>✓</span>
                 <span>{item}</span>
               </motion.li>
             ))}
           </motion.ul>
 
-          <div style={{ marginTop: 16, color: '#fff', opacity: 0.9 }}>
+          <div style={{ marginTop: 16, color: '#fff', opacity: 0.9, textAlign: isMobile ? 'center' : 'left' }}>
             <span>New here?</span>{' '}
             <Link to="/" style={{ color: '#fff', textDecoration: 'underline' }}>Explore the landing page</Link>
           </div>
@@ -65,9 +80,9 @@ export default function Auth() {
           variants={fadeUp}
           initial="hidden"
           animate="show"
-          style={card}
+          style={{ ...card, ...(isMobile ? cardMobile : null) }}
         >
-          <motion.div style={cardHeader}>
+          <motion.div style={{ ...cardHeader, ...(isMobile ? { flexDirection: 'row' } : null) }}>
             <button
               type="button"
               onClick={() => setMode('signup')}
@@ -171,6 +186,11 @@ const contentWrap: React.CSSProperties = {
   margin: '0 auto'
 }
 
+const contentWrapMobile: React.CSSProperties = {
+  gridTemplateColumns: '1fr',
+  gap: '1rem',
+}
+
 const promoPane: React.CSSProperties = {
   color: '#fff',
   padding: '2rem',
@@ -178,6 +198,10 @@ const promoPane: React.CSSProperties = {
   background: 'linear-gradient(160deg, var(--primary), var(--primary-700))',
   boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
   border: '1px solid color-mix(in srgb, var(--primary) 30%, #ffffff)',
+}
+
+const promoPaneMobile: React.CSSProperties = {
+  textAlign: 'center',
 }
 
 const logoTile: React.CSSProperties = {
@@ -198,6 +222,10 @@ const promoTitle: React.CSSProperties = {
   lineHeight: 1.2,
 }
 
+const promoTitleMobile: React.CSSProperties = {
+  fontSize: '1.6rem',
+}
+
 const promoText: React.CSSProperties = {
   marginTop: 8,
   color: 'rgba(255,255,255,0.9)'
@@ -209,6 +237,10 @@ const promoList: React.CSSProperties = {
   margin: '1rem 0 0',
   display: 'grid',
   gap: '.5rem'
+}
+
+const promoListMobile: React.CSSProperties = {
+  justifyItems: 'center',
 }
 
 const promoListItem: React.CSSProperties = {
@@ -229,6 +261,12 @@ const card: React.CSSProperties = {
   boxShadow: 'var(--shadow)',
   padding: '1.25rem',
   alignSelf: 'center'
+}
+
+const cardMobile: React.CSSProperties = {
+  maxWidth: 600,
+  width: '100%',
+  margin: '0 auto',
 }
 
 const cardHeader: React.CSSProperties = {

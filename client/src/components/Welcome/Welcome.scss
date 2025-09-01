@@ -86,6 +86,22 @@
   justify-content: space-between;
 }
 
+/* Mobile-first responsive navbar: logo on top, links below, centered */
+@media (max-width: 640px) {
+  .nav {
+    height: auto;
+    flex-direction: column;
+    gap: .5rem;
+    padding-block: .75rem;
+  }
+  .brand { justify-content: center; }
+  .links {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: .6rem;
+  }
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
@@ -113,6 +129,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* ensure logo + nav centered on very narrow screens */
+@media (max-width: 420px) {
+  .brandLogo { height: 40px; }
+  .links { width: 100%; justify-content: center; }
 }
 
 .links a {
