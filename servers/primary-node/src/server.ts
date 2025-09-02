@@ -9,7 +9,7 @@ import { initializeExpiryScheduler } from "./controllers/scheduler.controller";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || backupPort;
+const PORT = parseInt(process.env.PORT || "", 10) || backupPort;
 
 import { attachRequestId } from "./middleware/requestid.middleware";
 import { errorHandler } from "./middleware/error.middleware";
@@ -27,6 +27,8 @@ connectMongoDB();
 // Initialize daily expiry scheduler
 initializeExpiryScheduler();
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running at http://0.0.0.0:${PORT}`);
 });
+
+
