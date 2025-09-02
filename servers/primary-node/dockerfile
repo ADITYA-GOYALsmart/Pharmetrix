@@ -9,9 +9,11 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Install ts-node globally for running TypeScript directly
-RUN npm install -g ts-node
+# Build (optional for prod image; kept here for now)
+RUN npm run build
 
-# Serve
+# Expose API port
 EXPOSE 4200
+
+# Default command (will be overridden by compose in dev)
 CMD ["npm", "start"]

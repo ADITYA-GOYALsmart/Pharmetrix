@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 
-const API_URL = import.meta.env.VITE_API_URL as string
+const API_URL = (() => {
+  const envUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:4200'
+  if (typeof window === 'undefined') return envUrl
+  const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  return isLocal ? envUrl : 'https://pharmetrix.onrender.com'
+})()
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
