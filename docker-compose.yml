@@ -1,0 +1,28 @@
+services:
+  primary-node:
+    build:
+      context: ./servers/primary-node
+      dockerfile: dockerfile
+    container_name: pharmetrix-primary-node
+    environment:
+      # Add/override envs as needed; mounts .env inside src if present
+      - NODE_ENV=production
+    ports:
+      - "4200:4200"
+    volumes:
+      # Optional: remove in production; useful for dev hot-reload if nodemon is used
+      - ./servers/primary-node/src:/app/src
+    # As requested, use npm start as the run command
+    command: ["npm", "start"]
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pharmetrix-client
+    ports:
+      - "5000:80"
+    depends_on:
+      - primary-node
+
+# Optional networks/volumes can be added as needed
