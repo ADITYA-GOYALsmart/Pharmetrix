@@ -1,4 +1,4 @@
-import './Welcome.scss'
+import './Landing.scss'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
@@ -28,7 +28,7 @@ const stagger = {
   show: { transition: { staggerChildren: 0.12 } }
 }
 
-export default function Welcome() {
+export default function Landing() {
   return (
     <>
       {/* Header */}
@@ -42,7 +42,7 @@ export default function Welcome() {
             <nav className="links" aria-label="Primary">
               <a href="#features">Features</a>
               <a href="#metrics">Metrics</a>
-              <Link className="button buttonPrimary" to="/auth">Get Started</Link>
+              <Link className="button buttonPrimary" to="/get-started">Get Started</Link>
             </nav>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function Welcome() {
                 A full‑stack, cloud‑connected, edge‑enabled platform that unifies inventory & POS, real‑time storage monitoring, automated alerts, optional computer vision, and live streaming—engineered to streamline pharmacy operations.
               </motion.p>
               <motion.div className="heroCtas" variants={fadeUp}>
-                <Link className="button buttonPrimary" to="/auth">Get Started</Link>
+                <Link className="button buttonPrimary" to="/get-started">Get Started</Link>
                 <a className="button buttonSecondary" href="#features">Explore Features</a>
               </motion.div>
             </motion.div>
@@ -126,7 +126,7 @@ export default function Welcome() {
             <motion.div className="bandInner" initial={{ opacity: 0, scale: .98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.3 }}>
               <h2 id="cta-title" className="h2">Streamline your pharmacy operations</h2>
               <p className="subhead">Onboard devices, monitor storage, sell with confidence—start now.</p>
-              <Link className="button buttonPrimary" to="/auth">Get Started</Link>
+              <Link className="button buttonPrimary" to="/get-started">Get Started</Link>
             </motion.div>
           </div>
         </section>
@@ -146,7 +146,7 @@ export default function Welcome() {
             <ul className="footerList">
               <li><a href="#features">Features</a></li>
               <li><a href="#metrics">Metrics</a></li>
-              <li><Link to="/auth">Get Started</Link></li>
+              <li><Link to="/get-started">Get Started</Link></li>
             </ul>
           </nav>
 

@@ -9,6 +9,7 @@ import { createOrganization, addUserToOrganization, getInventory } from "./contr
 import { addMedicine, sellMedicine, discardBatch, markExpiredBatches } from "./controllers/inventory.controller";
 import { getStockSummary, getLowStock } from "./controllers/reports.controller";
 import { submitContact } from "./controllers/contact.controller";
+import { sendOtp, verifyOtp } from "./controllers/otp.controller";
 
 export const router = express.Router();
 
@@ -27,6 +28,10 @@ router.post('/signup', signup);
 router.post('/login', login);
 router.get("/check-token", checkTokenExpiry);
 router.get("/getuserinfo", sendUserInfo);
+
+// OTP routes
+router.post('/otp/send', sendOtp);
+router.post('/otp/verify', verifyOtp);
 
 router.patch("/user/edit/:id", authenticate, requireSelf, updateUser); // takes updates via body and id for finding
 router.delete("/user/delete/:id", authenticate, requireSelf, deleteUser); // just id
