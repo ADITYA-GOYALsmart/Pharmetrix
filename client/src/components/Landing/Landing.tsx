@@ -42,6 +42,7 @@ export default function Landing() {
             <nav className="links" aria-label="Primary">
               <a href="#features">Features</a>
               <a href="#metrics">Metrics</a>
+              <Link className="button buttonSecondary" to="/auth">Login</Link>
               <Link className="button buttonPrimary" to="/get-started">Get Started</Link>
             </nav>
           </div>

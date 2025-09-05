@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 
 const API_URL = (() => {
-  const envUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:4200'
+  const envUrl = (import.meta.env.PRIMARY_BACKEND_URL as string | undefined) ?? 'http://localhost:4200'
   if (typeof window === 'undefined') return envUrl
   const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
   return isLocal ? envUrl : 'https://pharmetrix.onrender.com'
@@ -358,7 +358,7 @@ const cardMobile: React.CSSProperties = { maxWidth: 600, width: '100%', margin: 
 const form: React.CSSProperties = { display: 'grid', gap: '.85rem' }
 const label: React.CSSProperties = { display: 'grid', gap: '.35rem' }
 const labelText: React.CSSProperties = { color: 'var(--text)', fontWeight: 700 }
-const input: React.CSSProperties = { padding: '.8rem 1rem', borderRadius: 12, border: '1px solid var(--border)', outline: 'none' }
+const input: React.CSSProperties = { padding: '.8rem 1rem', borderRadius: 12, background: '#ffffff', color: '#111827', border: '1px solid #e5e7eb', outline: 'none' }
 
 const submitBtn: React.CSSProperties = { width: '100%', padding: '.9rem 1rem', borderRadius: 12, border: '1px solid var(--primary)', background: 'linear-gradient(180deg, color-mix(in srgb, var(--primary) 92%, #ffffff), var(--primary-700))', color: '#fff', fontWeight: 800 }
 const resendBtn: React.CSSProperties = { background: '#f3f4f6', color: '#111827', borderRadius: 12, padding: '.9rem 1rem', border: '1px solid #e5e7eb' }
