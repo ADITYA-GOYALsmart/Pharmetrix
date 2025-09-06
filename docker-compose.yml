@@ -5,17 +5,13 @@ services:
       dockerfile: dockerfile
     container_name: pharmetrix-primary-node
     environment:
-      # Add/override envs as needed; mounts .env inside src if present
       - NODE_ENV=production
       - PORT=4200
     ports:
       - "4200:4200"
-    volumes:
-      # Optional: remove in production; useful for dev hot-reload if nodemon is used
-      - ./servers/primary-node/src:/app/src
-
-    # Run the API server
-    command: ["npm", "start"]
+    # For production, avoid mounting source. Uncomment for local dev only.
+    # volumes:
+    #   - ./servers/primary-node/src:/app/src
 
   client:
     build:
