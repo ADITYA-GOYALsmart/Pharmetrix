@@ -3,7 +3,7 @@
 # - Checks for Git, Node.js, npm (core)
 # - Optionally installs Docker Desktop, Python 3.11, and VS Build Tools (for node-gyp)
 # - Optionally runs npm install in project packages
-# - Optionally set execution policy for current user
+# - Optionally sets execution policy for current user
 
 [CmdletBinding()]
 param(
@@ -120,13 +120,11 @@ if ($needGit) {
 if ($needNode) {
     if (Ask-YesNo "Node.js is missing. Install Node.js LTS now?") {
         if (Install-WithWinget -Id 'OpenJS.NodeJS.LTS' -Display 'Node.js LTS') {
-            # npm typically comes with Node
-            $needNpm = -not (Test-Command 'npm')
+            $needNpm = -not (Test-Command 'npm') # npm typically comes with Node
         }
     }
 }
 if ($needNpm) {
-    # If npm somehow still not present after Node install
     Write-Warn "npm still not available. It usually comes with Node.js."
 }
 
