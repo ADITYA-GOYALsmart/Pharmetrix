@@ -1,6 +1,13 @@
 # Pharmetrix Application Runner
 param([string]$Mode = "")
 
+# Resolve repo root relative to this script so it can run from anywhere
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RepoRoot  = Resolve-Path (Join-Path $ScriptDir '.')
+$ClientDir = Join-Path $RepoRoot 'client'
+$PrimaryDir = Join-Path $RepoRoot 'servers\primary-node'
+$ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
+
 # ==========================
 # Utility: Styled Output
 # ==========================
@@ -47,11 +54,11 @@ function Show-Banner {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════════╗" -ForegroundColor $bannerColor
     Write-Host "  ║                                                              ║" -ForegroundColor $bannerColor
-    Write-Host "  ║                        P H A R M E T R I X                   ║" -ForegroundColor $accentColor
+    Write-Host "  ║                     P H A R M E T R I X                      ║" -ForegroundColor $accentColor
     Write-Host "  ║                                                              ║" -ForegroundColor $bannerColor
-    Write-Host "  ║   Smart Pharmaceutical Inventory System (Pharmetrix)         ║" -ForegroundColor White
+    Write-Host "  ║           A Smart Pharmaceutical Inventory System            ║" -ForegroundColor White
     Write-Host "  ║                                                              ║" -ForegroundColor $bannerColor
-    Write-Host "  ║                       by Prakhar Tripathi                     ║" -ForegroundColor $authorColor
+    Write-Host "  ║                                                              ║" -ForegroundColor $authorColor
     Write-Host "  ║                                                              ║" -ForegroundColor $bannerColor
     Write-Host "  ╚══════════════════════════════════════════════════════════════╝" -ForegroundColor $bannerColor
     Write-Host ""
@@ -59,19 +66,19 @@ function Show-Banner {
 
 function Show-Menu {
     Write-Host ""
-    Write-Host "  ╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║                      SELECT LAUNCH MODE                   ║" -ForegroundColor White
-    Write-Host "  ╠════════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
-    Write-Host "  ║                                                            ║" -ForegroundColor Cyan
-    Write-Host "  ║  [1] 🐳 Production Mode (Docker Up)                       ║" -ForegroundColor Cyan
-    Write-Host "  ║  [2] 🛠️  Development Mode (Local Dev)                      ║" -ForegroundColor Cyan
-    Write-Host "  ║  [3] 🐳 Docker Build (All Services)                        ║" -ForegroundColor Cyan
-    Write-Host "  ║  [4] ⚛️  React Build (client)                               ║" -ForegroundColor Cyan
-    Write-Host "  ║  [5] 🧩 Primary Node Build (tsc)                            ║" -ForegroundColor Cyan
-    Write-Host "  ║  [6] 📦 Build All (Primary + React)                         ║" -ForegroundColor Cyan
-    Write-Host "  ║  [7] ❌ Exit                                                ║" -ForegroundColor Cyan
-    Write-Host "  ║                                                            ║" -ForegroundColor Cyan
-    Write-Host "  ╚════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host "  ╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "  ║                      SELECT LAUNCH MODE                      ║" -ForegroundColor White
+    Write-Host "  ╠══════════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
+    Write-Host "  ║                                                              ║" -ForegroundColor Cyan
+    Write-Host "  ║ [1] Production Mode (Docker Up)                              ║" -ForegroundColor Cyan
+    Write-Host "  ║ [2] Development Mode (Local Dev)                             ║" -ForegroundColor Cyan
+    Write-Host "  ║ [3] Docker Build (All Services)                              ║" -ForegroundColor Cyan
+    Write-Host "  ║ [4] React Build (client)                                     ║" -ForegroundColor Cyan
+    Write-Host "  ║ [5] Primary Node Build (tsc)                                 ║" -ForegroundColor Cyan
+    Write-Host "  ║ [6] Build All (Primary + React)                              ║" -ForegroundColor Cyan
+    Write-Host "  ║ [7] Exit                                                     ║" -ForegroundColor Cyan
+    Write-Host "  ║                                                              ║" -ForegroundColor Cyan
+    Write-Host "  ╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -122,7 +129,7 @@ function Ensure-Dependencies {
 # Build Helpers (return $true/$false)
 # ==========================
 function Build-Docker {
-    $composeFile = "a:\My Projects and Code\FYP-Pharmetrix\docker-compose.yml"
+    $composeFile = $ComposeFile
     if (-not (Test-Docker)) { Write-Error "Docker is not running."; return $false }
     Write-Info "Building Docker services..."
     try {
@@ -137,7 +144,7 @@ function Build-Docker {
 }
 
 function Build-React {
-    $clientDir = "a:\My Projects and Code\FYP-Pharmetrix\client"
+    $clientDir = $ClientDir
     try { Ensure-Dependencies $clientDir } catch { Write-Error $_; return $false }
     Write-Info "Building React app..."
     Push-Location $clientDir
@@ -153,7 +160,7 @@ function Build-React {
 }
 
 function Build-Primary {
-    $primaryDir = "a:\My Projects and Code\FYP-Pharmetrix\servers\primary-node"
+    $primaryDir = $PrimaryDir
     try { Ensure-Dependencies $primaryDir } catch { Write-Error $_; return $false }
     Write-Info "Building Primary Node (TypeScript -> JS)..."
     Push-Location $primaryDir
@@ -185,8 +192,8 @@ function Build-All {
 function Start-Production {
     Write-Host ""
     Write-Host "  ╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "  ║                    🐳 PRODUCTION MODE                      ║" -ForegroundColor White
-    Write-Host "  ║                   Docker Deployment                        ║" -ForegroundColor Green
+    Write-Host "  ║                      PRODUCTION MODE                       ║" -ForegroundColor White
+    Write-Host "  ║                     Docker Deployment                      ║" -ForegroundColor Green
     Write-Host "  ╚════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
 
@@ -194,7 +201,7 @@ function Start-Production {
     if (-not (Test-Docker)) { Write-Error "Docker is not running! Please start Docker Desktop."; return }
     Show-ProgressBar "Docker Check" 100
 
-    $composeFile = "a:\My Projects and Code\FYP-Pharmetrix\docker-compose.yml"
+    $composeFile = $ComposeFile
 
     Write-Info "Stopping existing containers..."; Show-ProgressBar "Cleanup" 40
     try { Invoke-Compose @("-f", $composeFile, "down") | Out-Null } catch { }
@@ -212,8 +219,8 @@ function Start-Production {
 
     Write-Host ""
     Write-Host "  ╔════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "  ║                    🎉 SUCCESS!                            ║" -ForegroundColor White
-    Write-Host ("  ║          Application started in {0:N2} seconds!                    ║" -f $duration) -ForegroundColor Green
+    Write-Host "  ║                         SUCCESS!                           ║" -ForegroundColor White
+    Write-Host (" ║           Application started in {0:N2} seconds!           ║" -f $duration) -ForegroundColor Green
     Write-Host "  ╚════════════════════════════════════════════════════════════╝" -ForegroundColor Green
     Write-Host ""
 
@@ -227,9 +234,9 @@ function Start-Production {
 
     Write-Host ""
     Write-Warning "Useful Commands:"
-    Write-Host "     docker compose -f `"$composeFile`" logs -f    " -NoNewline -ForegroundColor DarkGray; Write-Host "(view logs)" -ForegroundColor Gray
-    Write-Host "     docker compose -f `"$composeFile`" down       " -NoNewline -ForegroundColor DarkGray; Write-Host "(stop app)" -ForegroundColor Gray
-    Write-Host "     docker compose -f `"$composeFile`" restart    " -NoNewline -ForegroundColor DarkGray; Write-Host "(restart)" -ForegroundColor Gray
+    Write-Host "     docker compose -f `"$ComposeFile`" logs -f    " -NoNewline -ForegroundColor DarkGray; Write-Host "(view logs)" -ForegroundColor Gray
+    Write-Host "     docker compose -f `"$ComposeFile`" down       " -NoNewline -ForegroundColor DarkGray; Write-Host "(stop app)" -ForegroundColor Gray
+    Write-Host "     docker compose -f `"$ComposeFile`" restart    " -NoNewline -ForegroundColor DarkGray; Write-Host "(restart)" -ForegroundColor Gray
 }
 
 # ==========================
@@ -238,7 +245,7 @@ function Start-Production {
 function Start-Development {
     Write-Host ""
     Write-Host "  ╔════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "  ║                    🛠️  DEVELOPMENT MODE                    ║" -ForegroundColor White
+    Write-Host "  ║                       DEVELOPMENT MODE                     ║" -ForegroundColor White
     Write-Host "  ║                Local servers with hot reload               ║" -ForegroundColor Cyan
     Write-Host "  ╚════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
@@ -246,9 +253,9 @@ function Start-Development {
     if (-not (Test-Node)) { Write-Error "Node.js is not installed or not on PATH."; return }
     if (-not (Test-Npm))  { Write-Error "npm is not installed or not on PATH."; return }
 
-    $root = "a:\My Projects and Code\FYP-Pharmetrix"
-    $clientDir = Join-Path $root "client"
-    $primaryDir = Join-Path $root "servers\primary-node"
+    $root = $RepoRoot
+    $clientDir = $ClientDir
+    $primaryDir = $PrimaryDir
 
     # Ensure dependencies
     try {
@@ -260,20 +267,18 @@ function Start-Development {
 
     # Start Primary Node (API)
     Write-Info "Starting Primary Backend (http://localhost:4200)..."
-    $apiCmd = "Set-Location `"$primaryDir`"; npm start"
-    Start-Process pwsh -ArgumentList '-NoExit','-Command', $apiCmd | Out-Null
+    # Use WorkingDirectory to avoid quoting issues with spaces in paths
+    Start-Process pwsh -WorkingDirectory $primaryDir -ArgumentList '-NoExit','-Command','npm start' | Out-Null
 
     Start-Sleep 1
 
-    # Start Client (Vite dev on 5000) with default env passthrough
+    # Prepare environment for client (defaults if not set)
+    $primaryUrl  = if ($env:PRIMARY_BACKEND_URL) { $env:PRIMARY_BACKEND_URL } else { 'http://localhost:4200' }
+    $deployedUrl = if ($env:DEPLOYED_BACKEND_URL) { $env:DEPLOYED_BACKEND_URL } else { 'http://localhost:4200' }
+
+    # Start Client (Vite dev on 5000)
     Write-Info "Starting Client (http://localhost:5000)..."
-    $clientCmd = @(
-        "Set-Location `"$clientDir`";",
-        "$env:PRIMARY_BACKEND_URL = $env:PRIMARY_BACKEND_URL ?? 'http://localhost:4200';",
-        "$env:DEPLOYED_BACKEND_URL = $env:DEPLOYED_BACKEND_URL ?? 'http://localhost:4200';",
-        "npm run dev"
-    ) -join ' '
-    Start-Process pwsh -ArgumentList '-NoExit','-Command', $clientCmd | Out-Null
+    Start-Process pwsh -WorkingDirectory $clientDir -ArgumentList '-NoExit','-Command','npm run dev' -Environment @{ PRIMARY_BACKEND_URL = $primaryUrl; DEPLOYED_BACKEND_URL = $deployedUrl } | Out-Null
 
     # Optional: open browser to client
     try { Start-Process "http://localhost:5000" | Out-Null } catch { }
