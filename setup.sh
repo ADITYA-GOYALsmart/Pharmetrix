@@ -130,6 +130,17 @@ run_npm_install "./servers/primary-node"
 run_npm_install "./client"
 run_npm_install "./servers/streaming-node"
 
+# Python deps for edge-py
+if [ -f "./servers/edge-py/requirements.txt" ]; then
+  if ask_yes_no "Install Python deps in './servers/edge-py' via requirements.txt?" "y"; then
+    echo "[INFO] Installing Python dependencies (pip)..."
+    (cd "./servers/edge-py" && python3 -m pip install -r requirements.txt || python -m pip install -r requirements.txt)
+    echo "[SUCCESS] pip install completed in edge-py."
+  else
+    echo "[WARN] Skipped pip install in edge-py."
+  fi
+fi
+
 echo ""
 echo "[SUCCESS] Setup completed."
 echo "[INFO] You may need to restart your terminal for PATH changes to take effect."

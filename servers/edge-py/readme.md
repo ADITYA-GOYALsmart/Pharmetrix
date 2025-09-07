@@ -1,34 +1,43 @@
-# Backend 2 – Edge Pi & Sensors
+# SPIS Edge Python Backend (FastAPI)
 
-## Description
+A lightweight FastAPI backend designed for Raspberry Pi edge processing and sensor integrations, following a clean, scalable folder structure.
 
-Runs on Raspberry Pi. Handles sensor reading, computer vision for vial counting, motion detection, and sends data to Backend 1.
-
-## Features
-
-* Read temperature (DS18B20) and optional humidity (DHT22).
-* Run computer vision to count vials in trays.
-* Optional motion detection.
-* Send sensor & CV data to cloud backend.
-* Expose API for live streaming feed to Backend 3.
-
-## Tech Stack
-
-* Python 3.11+
-* FastAPI / Flask
-* OpenCV, TensorFlow Lite (optional)
-* Sensor libraries (w1thermsensor, Adafruit\_DHT, etc.)
-
-## Running
-
-```bash
-cd backend-edge-pi
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
+## Structure
+```
+edge-py/
+├── src/
+│   ├── controllers/    # FastAPI route handlers
+│   ├── services/       # business logic
+│   ├── middleware/     # request/response middlewares
+│   ├── utils/          # helper functions
+│   ├── config/         # configuration (env, app settings)
+│   ├── router.py       # centralized router registration
+│   └── server.py       # entrypoint
+├── client.py           # simple client using httpx
+├── requirements.txt
+└── .env.example
 ```
 
-## Environment Variables
+## Quickstart
+1. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-* `BACKEND1_API_URL` – URL of Backend 1
-* `DEVICE_ID` – Unique Pi device ID
-* `DEVICE_TOKEN` – Authentication token for pairing
+2. Run the FastAPI server (with reload)
+```bash
+uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
+```
+
+3. Run the client script
+```bash
+python client.py
+```
+
+## Endpoints
+- GET `/ping` → `{ "pong": true }`
+
+## Environment Variables
+- `PORT` (default: 8000)
+- `CORS_ALLOWED_ORIGINS` (default: `*`)
+- `EDGE_BASE_URL` (used by client.py, default: `http://localhost:8000`)

@@ -101,6 +101,7 @@ $RepoRoot   = $PSScriptRoot
 $ClientDir  = Join-Path $RepoRoot 'client'
 $PrimaryDir = Join-Path $RepoRoot 'servers\primary-node'
 $StreamDir  = Join-Path $RepoRoot 'servers\streaming-node'
+$EdgeDir    = Join-Path $RepoRoot 'servers\edge-py'
 
 # 1) Execution Policy
 Ensure-ExecutionPolicy
@@ -154,7 +155,7 @@ if (-not $hasPython) {
 #     Install-WithWinget -Id 'Microsoft.VisualStudio.2022.BuildTools' -Display 'VS 2022 Build Tools' | Out-Null
 # }
 
-# 4) npm install in project packages
+# 4) Install project dependencies
 function Npm-Install {
     param([Parameter(Mandatory=$true)][string]$Dir)
     if (-not (Test-Path $Dir)) { return }
@@ -176,9 +177,30 @@ function Npm-Install {
     }
 }
 
+function Pip-Install {
+    param([Parameter(Mandatory=$true)][string]$Dir)
+    $req = Join-Path $Dir 'requirements.txt'
+    if (Test-Path $req) {
+        if (Ask-YesNo "Install Python deps in 'edge-py' via requirements.txt?") {
+            Push-Location $Dir
+            try {
+                Write-Info "Installing Python dependencies (pip)..."
+                $p = Start-Process -FilePath 'python' -ArgumentList @('-m','pip','install','-r','requirements.txt') -Wait -PassThru -NoNewWindow
+                if ($p.ExitCode -ne 0) { throw "pip install failed in edge-py (exit $($p.ExitCode))" }
+                Write-Success "pip install completed in edge-py."
+            } catch {
+                Write-Err $_
+            } finally { Pop-Location }
+        } else {
+            Write-Warn "Skipped pip install in edge-py."
+        }
+    }
+}
+
 Npm-Install -Dir $PrimaryDir
 Npm-Install -Dir $ClientDir
 Npm-Install -Dir $StreamDir # only runs if package.json exists
+Pip-Install -Dir $EdgeDir    # only runs if requirements.txt exists
 
 Write-Host ""; Write-Success "Setup completed."
 Write-Info "If you installed new tools, you may need to reopen your terminal for PATH changes to take effect."

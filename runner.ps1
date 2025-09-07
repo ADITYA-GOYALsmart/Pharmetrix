@@ -6,6 +6,8 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot  = Resolve-Path (Join-Path $ScriptDir '.')
 $ClientDir = Join-Path $RepoRoot 'client'
 $PrimaryDir = Join-Path $RepoRoot 'servers\primary-node'
+$StreamDir = Join-Path $RepoRoot 'servers\streaming-node'
+$EdgeDir = Join-Path $RepoRoot 'servers\edge-py'
 $ComposeFile = Join-Path $RepoRoot 'docker-compose.yml'
 
 # ==========================
@@ -75,8 +77,9 @@ function Show-Menu {
     Write-Host "  ║ [3] Docker Build (All Services)                              ║" -ForegroundColor Cyan
     Write-Host "  ║ [4] React Build (client)                                     ║" -ForegroundColor Cyan
     Write-Host "  ║ [5] Primary Node Build (tsc)                                 ║" -ForegroundColor Cyan
-    Write-Host "  ║ [6] Build All (Primary + React)                              ║" -ForegroundColor Cyan
-    Write-Host "  ║ [7] Exit                                                     ║" -ForegroundColor Cyan
+    Write-Host "  ║ [6] Streaming Node Build (tsc)                               ║" -ForegroundColor Cyan
+    Write-Host "  ║ [7] Build All (Primary + React + Streaming)                  ║" -ForegroundColor Cyan
+    Write-Host "  ║ [8] Exit                                                     ║" -ForegroundColor Cyan
     Write-Host "  ║                                                              ║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
@@ -86,10 +89,10 @@ function Get-UserChoice {
     do {
         Write-Host "  💡 " -NoNewline -ForegroundColor Yellow
         Write-Host "Enter your choice " -NoNewline -ForegroundColor White
-        Write-Host "(1-7): " -NoNewline -ForegroundColor Cyan
+        Write-Host "(1-8): " -NoNewline -ForegroundColor Cyan
         $choice = Read-Host
-        if ($choice -match '^[1-7]$') { return $choice }
-        Write-Host "  ❌ Invalid choice! Please enter 1-7." -ForegroundColor Red
+        if ($choice -match '^[1-8]$') { return $choice }
+        Write-Host "  ❌ Invalid choice! Please enter 1-8." -ForegroundColor Red
         Write-Host ""
     } while ($true)
 }
@@ -117,11 +120,14 @@ function Invoke-Compose {
 function Ensure-Dependencies {
     param([string]$Path)
     if (-not (Test-Path -Path $Path)) { throw "Path not found: $Path" }
-    $nodeModules = Join-Path $Path "node_modules"
-    if (-not (Test-Path -Path $nodeModules)) {
-        Write-Step "Installing dependencies in $Path"
-        Push-Location $Path
-        try { npm install } finally { Pop-Location }
+    $pkgJson = Join-Path $Path 'package.json'
+    if (Test-Path $pkgJson) {
+        $nodeModules = Join-Path $Path "node_modules"
+        if (-not (Test-Path -Path $nodeModules)) {
+            Write-Step "Installing npm dependencies in $Path"
+            Push-Location $Path
+            try { npm install } finally { Pop-Location }
+        }
     }
 }
 
@@ -175,10 +181,27 @@ function Build-Primary {
     } finally { Pop-Location }
 }
 
+function Build-Streaming {
+    $streamDir = $StreamDir
+    try { Ensure-Dependencies $streamDir } catch { Write-Error $_; return $false }
+    Write-Info "Building Streaming Node (TypeScript -> JS)..."
+    Push-Location $streamDir
+    try {
+        npm run build
+        if ($LASTEXITCODE -ne 0) { throw "npm run build failed." }
+        Write-Success "Streaming Node build successful."
+        return $true
+    } catch {
+        Write-Error ("Streaming Node build error: {0}" -f $_)
+        return $false
+    } finally { Pop-Location }
+}
+
 function Build-All {
     $ok1 = Build-Primary
     $ok2 = Build-React
-    if ($ok1 -and $ok2) {
+    $ok3 = Build-Streaming
+    if ($ok1 -and $ok2 -and $ok3) {
         Write-Success "All builds completed successfully."
         return $true
     }
@@ -226,7 +249,9 @@ function Start-Production {
 
     Write-Info "APPLICATION URLS:"
     Write-Host "     Frontend: " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:5000" -ForegroundColor Cyan
-    Write-Host "     Backend:  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4200" -ForegroundColor Cyan
+    Write-Host "     API (Primary):  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4200" -ForegroundColor Cyan
+    Write-Host "     Edge (Python):  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:8000" -ForegroundColor Cyan
+    Write-Host "     Streaming:      " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4000" -ForegroundColor Cyan
     Write-Host ""
 
     Write-Info "Container Status:"
@@ -280,6 +305,25 @@ function Start-Development {
     Write-Info "Starting Client (http://localhost:5000)..."
     Start-Process pwsh -WorkingDirectory $clientDir -ArgumentList '-NoExit','-Command','npm run dev' -Environment @{ PRIMARY_BACKEND_URL = $primaryUrl; DEPLOYED_BACKEND_URL = $deployedUrl } | Out-Null
 
+    Start-Sleep 1
+
+    # Start Streaming Node (dev)
+    if (Test-Path (Join-Path $StreamDir 'package.json')) {
+        Write-Info "Starting Streaming Backend (TypeScript, dev)..."
+        Start-Process pwsh -WorkingDirectory $StreamDir -ArgumentList '-NoExit','-Command','npm start' | Out-Null
+    } else {
+        Write-Warning "Streaming Node package.json not found, skipping."
+    }
+
+    # Start Edge Python (uvicorn dev)
+    if (Test-Path (Join-Path $EdgeDir 'requirements.txt')) {
+        Write-Info "Starting Edge Python (FastAPI) on http://localhost:8000..."
+        $edgeCmd = 'uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload'
+        Start-Process pwsh -WorkingDirectory $EdgeDir -ArgumentList '-NoExit','-Command', $edgeCmd | Out-Null
+    } else {
+        Write-Warning "Edge Python requirements.txt not found, skipping."
+    }
+
     # Optional: open browser to client
     try { Start-Process "http://localhost:5000" | Out-Null } catch { }
 
@@ -300,6 +344,7 @@ switch -Regex ($Mode.ToLower()) {
     '^(react-?build|client-?build)$' { Build-React | Out-Null; break }
     '^(primary-?build|api-?build|server-?build)$' { Build-Primary | Out-Null; break }
     '^(build-?all)$'          { Build-All | Out-Null; break }
+    '^(streaming-?build)$'     { Build-Streaming | Out-Null; break }
     default {
         Show-Menu
         $choice = Get-UserChoice
@@ -309,8 +354,9 @@ switch -Regex ($Mode.ToLower()) {
             '3' { Build-Docker | Out-Null }
             '4' { Build-React | Out-Null }
             '5' { Build-Primary | Out-Null }
-            '6' { Build-All | Out-Null }
-            '7' { Write-Info "Exiting..." }
+            '6' { Build-Streaming | Out-Null }
+            '7' { Build-All | Out-Null }
+            '8' { Write-Info "Exiting..." }
         }
     }
 }

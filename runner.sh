@@ -10,6 +10,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$SCRIPT_DIR"
 CLIENT_DIR="$REPO_ROOT/client"
 PRIMARY_DIR="$REPO_ROOT/servers/primary-node"
+STREAM_DIR="$REPO_ROOT/servers/streaming-node"
+EDGE_DIR="$REPO_ROOT/servers/edge-py"
 COMPOSE_FILE="$REPO_ROOT/docker-compose.yml"
 
 # ==========================
@@ -58,8 +60,9 @@ show_menu() {
     echo "  ║ [3] Docker Build (All Services)                              ║"
     echo "  ║ [4] React Build (client)                                     ║"
     echo "  ║ [5] Primary Node Build (tsc)                                 ║"
-    echo "  ║ [6] Build All (Primary + React)                              ║"
-    echo "  ║ [7] Exit                                                     ║"
+    echo "  ║ [6] Streaming Node Build (tsc)                               ║"
+    echo "  ║ [7] Build All (Primary + React + Streaming)                  ║"
+    echo "  ║ [8] Exit                                                     ║"
     echo "  ╚══════════════════════════════════════════════════════════════╝"
     echo ""
 }
@@ -67,12 +70,12 @@ show_menu() {
 get_user_choice() {
     local choice
     while true; do
-        read -p "  💡 Enter your choice (1-7): " choice
-        if [[ "$choice" =~ ^[1-7]$ ]]; then
+        read -p "  💡 Enter your choice (1-8): " choice
+        if [[ "$choice" =~ ^[1-8]$ ]]; then
             echo "$choice"
             return
         fi
-        echo -e "\033[31m  ❌ Invalid choice! Please enter 1-7.\033[0m"
+        echo -e "\033[31m  ❌ Invalid choice! Please enter 1-8.\033[0m"
         echo ""
     done
 }
@@ -131,8 +134,15 @@ build_primary() {
     write_success "Primary Node build successful."
 }
 
+build_streaming() {
+    ensure_dependencies "$STREAM_DIR"
+    write_info "Building Streaming Node (TypeScript -> JS)..."
+    (cd "$STREAM_DIR" && npm run build) || { write_error "Streaming Node build failed"; return 1; }
+    write_success "Streaming Node build successful."
+}
+
 build_all() {
-    build_primary && build_react && write_success "All builds completed successfully." || write_error "One or more builds failed."
+    build_primary && build_react && build_streaming && write_success "All builds completed successfully." || write_error "One or more builds failed."
 }
 
 # ==========================
@@ -169,8 +179,10 @@ start_production() {
     echo "  ╚════════════════════════════════════════════════════════════╝"
     echo ""
     write_info "APPLICATION URLS:"
-    echo "     Frontend: http://localhost:5000"
-    echo "     Backend:  http://localhost:4200"
+    echo "     Frontend:  http://localhost:5000"
+    echo "     API:       http://localhost:4200"
+    echo "     Edge:      http://localhost:8000"
+    echo "     Streaming: http://localhost:4000"
     echo ""
 }
 
@@ -200,6 +212,22 @@ start_development() {
     PRIMARY_BACKEND_URL="http://localhost:4200" DEPLOYED_BACKEND_URL="http://localhost:4200" \
         (cd "$CLIENT_DIR" && npm run dev) &
 
+    # Start Streaming Node (dev)
+    if [ -f "$STREAM_DIR/package.json" ]; then
+        write_info "Starting Streaming Backend (TypeScript, dev)..."
+        (cd "$STREAM_DIR" && npm start) &
+    else
+        write_warning "Streaming Node package.json not found, skipping."
+    fi
+
+    # Start Edge Python (uvicorn dev)
+    if [ -f "$EDGE_DIR/requirements.txt" ]; then
+        write_info "Starting Edge Python (FastAPI) on http://localhost:8000..."
+        (cd "$EDGE_DIR" && uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload) &
+    else
+        write_warning "Edge Python requirements.txt not found, skipping."
+    fi
+
     write_success "Development services launched (background processes)."
     write_info "Check logs in this terminal or run 'ps' to manage."
 }
@@ -215,6 +243,7 @@ case "$MODE" in
     docker-build)    build_docker ;;
     react-build|client-build) build_react ;;
     primary-build|api-build|server-build) build_primary ;;
+    streaming-build) build_streaming ;;
     build-all)       build_all ;;
     *) show_menu; choice=$(get_user_choice); case "$choice" in
         1) start_production ;;
@@ -222,7 +251,8 @@ case "$MODE" in
         3) build_docker ;;
         4) build_react ;;
         5) build_primary ;;
-        6) build_all ;;
-        7) write_info "Exiting..." ;;
+        6) build_streaming ;;
+        7) build_all ;;
+        8) write_info "Exiting..." ;;
     esac ;;
 esac
