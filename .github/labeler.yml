@@ -1,0 +1,75 @@
+# ============================
+# Frontend
+# ============================
+frontend:
+  - "client/**"
+
+# ============================
+# Backend Servers
+# ============================
+
+# Python Edge server
+edge-py:
+  - "servers/edge-py/**"
+
+# Node.js Primary server
+primary-node:
+  - "servers/primary-node/**"
+
+# Node.js Streaming server
+streaming-node:
+  - "servers/streaming-node/**"
+
+# Any change in servers
+servers:
+  - "servers/**"
+
+# ============================
+# Infrastructure / DevOps
+# ============================
+infra:
+  - "docker-compose.yml"
+  - "servers/**/dockerfile"
+  - "servers/**/.dockerignore"
+  - "runner.*"
+  - "setup.*"
+  - ".gitignore"
+
+# ============================
+# Documentation
+# ============================
+docs:
+  - "**/*.md"
+  - "**/*.pdf"
+
+# ============================
+# Dependencies
+# ============================
+dependencies:
+  - "package.json"
+  - "package-lock.json"
+  - "servers/**/package.json"
+  - "servers/**/package-lock.json"
+  - "servers/**/requirements.txt"
+
+# ============================
+# Language Specific
+# ============================
+python:
+  - "**/*.py"
+  - "servers/edge-py/**"
+
+typescript:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "servers/**/tsconfig.json"
+
+shell:
+  - "**/*.sh"
+  - "**/*.ps1"
+
+# ============================
+# Catch-all
+# ============================
+misc:
+  - "*"
