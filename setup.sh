@@ -94,9 +94,30 @@ install_common_deps() {
   if ! command -v python3.11 &>/dev/null; then
     if ask_yes_no "Install Python 3.11 (optional)?" "n"; then
       case $os in
-        "macOS") brew install python@3.11 ;;
-        "Debian") sudo apt install -y python3.11 ;;
-        "Arch") sudo pacman -Sy --noconfirm python ;;
+        "macOS")
+          if ! brew install python@3.11; then
+            echo "[WARN] Python 3.11 not available via Homebrew. Installing latest python3..."
+            brew install python
+          fi
+          ;;
+        "Debian")
+          if ! sudo apt install -y python3.11; then
+            echo "[WARN] Python 3.11 not found in default repos. Adding deadsnakes PPA..."
+            sudo apt-get install -y software-properties-common
+            sudo add-apt-repository -y ppa:deadsnakes/ppa
+            sudo apt update
+            if ! sudo apt install -y python3.11; then
+              echo "[WARN] Python 3.11 still unavailable. Installing default python3..."
+              sudo apt install -y python3
+            fi
+          fi
+          ;;
+        "Arch")
+          if ! sudo pacman -Sy --noconfirm python3.11; then
+            echo "[WARN] Python 3.11 not available in Arch repos. Installing latest python..."
+            sudo pacman -Sy --noconfirm python
+          fi
+          ;;
       esac
     fi
   else
