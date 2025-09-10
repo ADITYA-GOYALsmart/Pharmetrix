@@ -1,4 +1,4 @@
-# SPIS Project Setup Assistant (Windows PowerShell)
+# Pharmetrix Project Setup Assistant (Windows PowerShell)
 # Purpose: Interactive setup for dependencies and project packages
 # - Checks for Git, Node.js, npm (core)
 # - Optionally installs Docker Desktop, Python 3.11, and VS Build Tools (for node-gyp)
@@ -91,10 +91,62 @@ function Install-WithWinget {
     }
 }
 
+function Configure-UTF8AndEmoji {
+    try {
+        # Configure current session encodings (helps immediately)
+        [Console]::InputEncoding  = [System.Text.UTF8Encoding]::new()
+        [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+        $OutputEncoding = [System.Text.UTF8Encoding]::new()
+        try { $PSStyle.OutputRendering = 'Ansi' } catch { }
+        try { chcp 65001 | Out-Null } catch { }
+        Write-Info "Configured current session for UTF-8 and ANSI rendering."
+    } catch {
+        Write-Warn ("Failed to set current session UTF-8: {0}" -f $_)
+    }
+
+    # Persist settings into user profiles for both Windows PowerShell (5.x) and PowerShell 7+ (pwsh)
+    $marker = 'Pharmetrix UTF-8 + Emoji config'
+    $block = @"
+# >>> $marker (auto-added by setup.ps1)
+try {
+    [Console]::InputEncoding  = [System.Text.UTF8Encoding]::new()
+    [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+    # For external processes launched from PowerShell
+    $OutputEncoding = [System.Text.UTF8Encoding]::new()
+} catch { }
+try { $PSStyle.OutputRendering = 'Ansi' } catch { }
+# Keep legacy console code page on UTF-8
+try { chcp 65001 | Out-Null } catch { }
+# <<< $marker
+"@
+
+    $targets = @(
+        (Join-Path $HOME 'Documents\WindowsPowerShell\Profile.ps1'),
+        (Join-Path $HOME 'Documents\PowerShell\Profile.ps1')
+    )
+
+    foreach ($p in $targets) {
+        try {
+            $dir = Split-Path $p -Parent
+            if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+            if (-not (Test-Path $p)) { New-Item -ItemType File -Path $p -Force | Out-Null }
+            $existing = Get-Content -Path $p -Raw -ErrorAction SilentlyContinue
+            if ($existing -notmatch [regex]::Escape($marker)) {
+                Add-Content -Path $p -Value "`r`n$block`r`n"
+                Write-Success "Updated profile: $p"
+            } else {
+                Write-Info "Profile already configured: $p"
+            }
+        } catch {
+            Write-Warn ("Failed updating profile {0}: {1}" -f $p, $_)
+        }
+    }
+}
+
 # ==========================
 # Begin
 # ==========================
-Write-Host ""; Write-Host "=== SPIS Project Setup Assistant ===" -ForegroundColor Magenta; Write-Host ""
+Write-Host ""; Write-Host "=== Pharmetrix Project Setup Assistant ===" -ForegroundColor Magenta; Write-Host ""
 
 # Resolve repo paths relative to this script
 $RepoRoot   = $PSScriptRoot
@@ -105,6 +157,9 @@ $EdgeDir    = Join-Path $RepoRoot 'servers\edge-py'
 
 # 1) Execution Policy
 Ensure-ExecutionPolicy
+
+# Configure UTF-8/Emoji for current and future sessions
+Configure-UTF8AndEmoji
 
 # 2) Core Dependencies: Git, Node, npm
 $needGit  = -not (Test-Command 'git')
@@ -127,6 +182,26 @@ if ($needNode) {
 }
 if ($needNpm) {
     Write-Warn "npm still not available. It usually comes with Node.js."
+}
+
+# Ensure PowerShell 7 (pwsh)
+$needPwsh = -not (Test-Command 'pwsh')
+if (-not $needPwsh) {
+    Write-Info "pwsh: $(pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')"
+} else {
+    Write-Warn "pwsh (PowerShell 7+): not found"
+}
+if ($needPwsh) {
+    if (Ask-YesNo "PowerShell 7 (pwsh) is missing. Install it now?") {
+        if (Install-WithWinget -Id 'Microsoft.PowerShell' -Display 'PowerShell 7') {
+            Refresh-Path-InSession
+            if (Test-Command 'pwsh') {
+                Write-Success "pwsh installed: $(pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')"
+            } else {
+                Write-Warn "pwsh not detected on PATH yet. You may need to restart your terminal."
+            }
+        }
+    }
 }
 
 # 3) Optional dependencies

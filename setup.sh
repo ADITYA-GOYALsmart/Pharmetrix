@@ -2,7 +2,7 @@
 
 set -e
 
-echo "=== SPIS Project Setup Assistant (Cross-Platform) ==="
+echo "=== Pharmetrix Project Setup Assistant (Cross-Platform) ==="
 echo ""
 
 echo "Select your OS:"

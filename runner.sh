@@ -1,7 +1,7 @@
 #!/bin/bash
 # Pharmetrix Application Runner
 
-MODE="${1,,}"  # lowercase input
+MODE="$(echo "$1" | tr '[:upper:]' '[:lower:]')"  # lowercase input (portable)
 
 # ==========================
 # Resolve repo root relative to this script
@@ -204,18 +204,20 @@ start_development() {
     ensure_dependencies "$CLIENT_DIR"
 
     write_info "Starting Primary Backend (http://localhost:4200)..."
-    (cd "$PRIMARY_DIR" && npm start) &
+    cd "$PRIMARY_DIR" && npm start & 
+    cd "$REPO_ROOT" || exit 1
 
     sleep 1
 
     write_info "Starting Client (http://localhost:5000)..."
-    PRIMARY_BACKEND_URL="http://localhost:4200" DEPLOYED_BACKEND_URL="http://localhost:4200" \
-        (cd "$CLIENT_DIR" && npm run dev) &
+    cd "$CLIENT_DIR" && PRIMARY_BACKEND_URL="http://localhost:4200" DEPLOYED_BACKEND_URL="http://localhost:4200" npm run dev &
+    cd "$REPO_ROOT" || exit 1
 
     # Start Streaming Node (dev)
     if [ -f "$STREAM_DIR/package.json" ]; then
         write_info "Starting Streaming Backend (TypeScript, dev)..."
-        (cd "$STREAM_DIR" && npm start) &
+        cd "$STREAM_DIR" && npm start &
+        cd "$REPO_ROOT" || exit 1
     else
         write_warning "Streaming Node package.json not found, skipping."
     fi
@@ -223,7 +225,8 @@ start_development() {
     # Start Edge Python (uvicorn dev)
     if [ -f "$EDGE_DIR/requirements.txt" ]; then
         write_info "Starting Edge Python (FastAPI) on http://localhost:8000..."
-        (cd "$EDGE_DIR" && uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload) &
+        cd "$EDGE_DIR" && uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload &
+        cd "$REPO_ROOT" || exit 1
     else
         write_warning "Edge Python requirements.txt not found, skipping."
     fi
