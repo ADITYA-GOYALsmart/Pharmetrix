@@ -8,7 +8,8 @@ MODE="$(echo "$1" | tr '[:upper:]' '[:lower:]')"  # lowercase input (portable)
 # ==========================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$SCRIPT_DIR"
-CLIENT_DIR="$REPO_ROOT/client"
+REACT_DIR="$REPO_ROOT/clients/react"
+ANGULAR_DIR="$REPO_ROOT/clients/angular"
 PRIMARY_DIR="$REPO_ROOT/servers/primary-node"
 STREAM_DIR="$REPO_ROOT/servers/streaming-node"
 EDGE_DIR="$REPO_ROOT/servers/edge-py"
@@ -58,11 +59,12 @@ show_menu() {
     echo "  ║ [1] Production Mode (Docker Up)                              ║"
     echo "  ║ [2] Development Mode (Local Dev)                             ║"
     echo "  ║ [3] Docker Build (All Services)                              ║"
-    echo "  ║ [4] React Build (client)                                     ║"
-    echo "  ║ [5] Primary Node Build (tsc)                                 ║"
-    echo "  ║ [6] Streaming Node Build (tsc)                               ║"
-    echo "  ║ [7] Build All (Primary + React + Streaming)                  ║"
-    echo "  ║ [8] Exit                                                     ║"
+    echo "  ║ [4] React Build (clients/react)                              ║"
+    echo "  ║ [5] Angular Build (clients/angular)                          ║"
+    echo "  ║ [6] Primary Node Build (tsc)                                 ║"
+    echo "  ║ [7] Streaming Node Build (tsc)                               ║"
+    echo "  ║ [8] Build All (Primary + React + Angular + Streaming)        ║"
+    echo "  ║ [9] Exit                                                     ║"
     echo "  ╚══════════════════════════════════════════════════════════════╝"
     echo ""
 }
@@ -70,12 +72,12 @@ show_menu() {
 get_user_choice() {
     local choice
     while true; do
-        read -p "  💡 Enter your choice (1-8): " choice
-        if [[ "$choice" =~ ^[1-8]$ ]]; then
+        read -p "  💡 Enter your choice (1-9): " choice
+        if [[ "$choice" =~ ^[1-9]$ ]]; then
             echo "$choice"
             return
         fi
-        echo -e "\033[31m  ❌ Invalid choice! Please enter 1-8.\033[0m"
+        echo -e "\033[31m  ❌ Invalid choice! Please enter 1-9.\033[0m"
         echo ""
     done
 }
@@ -121,10 +123,17 @@ build_docker() {
 }
 
 build_react() {
-    ensure_dependencies "$CLIENT_DIR"
+    ensure_dependencies "$REACT_DIR"
     write_info "Building React app..."
-    (cd "$CLIENT_DIR" && npm run build) || { write_error "React build failed"; return 1; }
+    (cd "$REACT_DIR" && npm run build) || { write_error "React build failed"; return 1; }
     write_success "React build successful."
+}
+
+build_angular() {
+    ensure_dependencies "$ANGULAR_DIR"
+    write_info "Building Angular app..."
+    (cd "$ANGULAR_DIR" && npm run build) || { write_error "Angular build failed"; return 1; }
+    write_success "Angular build successful."
 }
 
 build_primary() {
@@ -142,7 +151,7 @@ build_streaming() {
 }
 
 build_all() {
-    build_primary && build_react && build_streaming && write_success "All builds completed successfully." || write_error "One or more builds failed."
+    build_primary && build_react && build_angular && build_streaming && write_success "All builds completed successfully." || write_error "One or more builds failed."
 }
 
 # ==========================
@@ -179,10 +188,11 @@ start_production() {
     echo "  ╚════════════════════════════════════════════════════════════╝"
     echo ""
     write_info "APPLICATION URLS:"
-    echo "     Frontend:  http://localhost:5000"
-    echo "     API:       http://localhost:4200"
-    echo "     Edge:      http://localhost:8000"
-    echo "     Streaming: http://localhost:4000"
+    echo "     React Frontend:   http://localhost:5000"
+    echo "     Angular Frontend: http://localhost:5100"
+    echo "     API (Primary):    http://localhost:4200"
+    echo "     Edge (Python):    http://localhost:8000"
+    echo "     Streaming:        http://localhost:4000"
     echo ""
 }
 
@@ -200,22 +210,31 @@ start_development() {
     if ! test_node; then write_error "Node.js not installed."; return; fi
     if ! test_npm; then write_error "npm not installed."; return; fi
 
+    # Ensure deps for all local dev services
     ensure_dependencies "$PRIMARY_DIR"
-    ensure_dependencies "$CLIENT_DIR"
+    ensure_dependencies "$REACT_DIR"
+    ensure_dependencies "$ANGULAR_DIR"
 
+    # Start Primary Backend
     write_info "Starting Primary Backend (http://localhost:4200)..."
-    cd "$PRIMARY_DIR" && npm start & 
+    cd "$PRIMARY_DIR" && npm start &
     cd "$REPO_ROOT" || exit 1
 
     sleep 1
 
-    write_info "Starting Client (http://localhost:5000)..."
-    cd "$CLIENT_DIR" && PRIMARY_BACKEND_URL="http://localhost:4200" DEPLOYED_BACKEND_URL="http://localhost:4200" npm run dev &
+    # Start React Dev Server (Vite) on :5000
+    write_info "Starting React Client (http://localhost:5000)..."
+    cd "$REACT_DIR" && PRIMARY_BACKEND_URL="http://localhost:4200" DEPLOYED_BACKEND_URL="http://localhost:4200" npm run dev -- --port 5000 --host 0.0.0.0 &
+    cd "$REPO_ROOT" || exit 1
+
+    # Start Angular Dev Server on :5100
+    write_info "Starting Angular Dev (http://localhost:5100)..."
+    cd "$ANGULAR_DIR" && npx ng serve &
     cd "$REPO_ROOT" || exit 1
 
     # Start Streaming Node (dev)
     if [ -f "$STREAM_DIR/package.json" ]; then
-        write_info "Starting Streaming Backend (TypeScript, dev)..."
+        write_info "Starting Streaming Backend (TypeScript, dev)... (http://localhost:4000)"
         cd "$STREAM_DIR" && npm start &
         cd "$REPO_ROOT" || exit 1
     else
@@ -232,7 +251,7 @@ start_development() {
     fi
 
     write_success "Development services launched (background processes)."
-    write_info "Check logs in this terminal or run 'ps' to manage."
+    write_info "React: http://localhost:5000 | Angular: http://localhost:5100 | API: http://localhost:4200 | Streaming: http://localhost:4000 | Edge: http://localhost:8000"
 }
 
 # ==========================
@@ -245,6 +264,7 @@ case "$MODE" in
     dev|development) start_development ;;
     docker-build)    build_docker ;;
     react-build|client-build) build_react ;;
+    angular-build|ng-build) build_angular ;;
     primary-build|api-build|server-build) build_primary ;;
     streaming-build) build_streaming ;;
     build-all)       build_all ;;
@@ -253,9 +273,10 @@ case "$MODE" in
         2) start_development ;;
         3) build_docker ;;
         4) build_react ;;
-        5) build_primary ;;
-        6) build_streaming ;;
-        7) build_all ;;
-        8) write_info "Exiting..." ;;
+        5) build_angular ;;
+        6) build_primary ;;
+        7) build_streaming ;;
+        8) build_all ;;
+        9) write_info "Exiting..." ;;
     esac ;;
 esac

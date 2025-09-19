@@ -36,13 +36,25 @@ services:
     ports:
       - "8000:8000"
 
-  client:
+  react-client:
     build:
-      context: ./client
+      context: ./clients/react
       dockerfile: Dockerfile
-    container_name: pharmetrix-client
+    container_name: pharmetrix-react-client
     ports:
       - "5000:80"
+    depends_on:
+      - primary-node
+      - streaming-node
+      - edge-py
+
+  angular-client:
+    build:
+      context: ./clients/angular
+      dockerfile: Dockerfile
+    container_name: pharmetrix-angular-client
+    ports:
+      - "5001:80"
     depends_on:
       - primary-node
       - streaming-node

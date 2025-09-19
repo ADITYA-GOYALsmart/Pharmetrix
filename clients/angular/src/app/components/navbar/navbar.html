@@ -1,0 +1,28 @@
+<mat-toolbar>
+  <button mat-icon-button (click)="toggleDrawer()" class="btn" matTooltip="Toggle Menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <img src="/full-logo.png" alt="logo" class="logo" />
+  <span class="title">EDC Module Dashboard</span>
+  <span class="spacer"></span>
+  <button class="btn" mat-icon-button matTooltip="Connect This Device" [disabled]="isConnected" (click)="pairDevice()">
+    <mat-icon>add_circle_outline</mat-icon>
+  </button>
+  <button class="btn" mat-icon-button matTooltip="Visit Pharmetrix" (click)="goToPharmetrix()">
+    <mat-icon>exit_to_app</mat-icon>
+  </button>
+  <button class="btn" matIconButton [matMenuTriggerFor]="menu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item [disabled]="!isConnected" (click)="unpairDevice()">
+    <mat-icon>block</mat-icon>
+    <span>Unpair Device</span>
+  </button>
+  <button mat-menu-item (click)="goToGithub()">
+    <mat-icon>open_in_new</mat-icon>
+    <span>Help & Support</span>
+  </button>
+</mat-menu>

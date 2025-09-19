@@ -1,0 +1,55 @@
+@use '../../colors.scss' as *;
+
+mat-toolbar {
+  background: linear-gradient(90deg, $background, $secondary);
+  color: white;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $primary;
+  gap: 10px;
+
+  .logo {
+    height: 50px;
+    width: auto;
+  }
+
+  .title {
+    color: $primary;
+    font-weight: bold;
+  }
+
+  .btn{
+    color: $primary;
+    transition: 0.2s ease-in-out;
+    scale: 1.15;
+    &:hover {
+      scale: 1.5;
+      transition: 0.2s ease-in-out;
+    }
+
+    &disabled {
+      color: gray;
+      cursor: not-allowed;
+      &:hover {
+        scale: 1.15;
+      }
+    }
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+
+.menu{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  button{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+}

@@ -148,7 +148,8 @@ esac
 # npm installs
 # ==========================
 run_npm_install "./servers/primary-node"
-run_npm_install "./client"
+run_npm_install "./clients/react"
+run_npm_install "./clients/angular"
 run_npm_install "./servers/streaming-node"
 
 # Python deps for edge-py

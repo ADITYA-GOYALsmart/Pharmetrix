@@ -150,7 +150,8 @@ Write-Host ""; Write-Host "=== Pharmetrix Project Setup Assistant ===" -Foregrou
 
 # Resolve repo paths relative to this script
 $RepoRoot   = $PSScriptRoot
-$ClientDir  = Join-Path $RepoRoot 'client'
+$ReactDir   = Join-Path $RepoRoot 'clients\react'
+$AngularDir = Join-Path $RepoRoot 'clients\angular'
 $PrimaryDir = Join-Path $RepoRoot 'servers\primary-node'
 $StreamDir  = Join-Path $RepoRoot 'servers\streaming-node'
 $EdgeDir    = Join-Path $RepoRoot 'servers\edge-py'
@@ -273,7 +274,8 @@ function Pip-Install {
 }
 
 Npm-Install -Dir $PrimaryDir
-Npm-Install -Dir $ClientDir
+Npm-Install -Dir $ReactDir
+Npm-Install -Dir $AngularDir
 Npm-Install -Dir $StreamDir # only runs if package.json exists
 Pip-Install -Dir $EdgeDir    # only runs if requirements.txt exists
 

@@ -4,7 +4,8 @@ param([string]$Mode = "")
 # Resolve repo root relative to this script so it can run from anywhere
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot  = Resolve-Path (Join-Path $ScriptDir '.')
-$ClientDir = Join-Path $RepoRoot 'client'
+$ReactDir = Join-Path $RepoRoot 'clients\react'
+$AngularDir = Join-Path $RepoRoot 'clients\angular'
 $PrimaryDir = Join-Path $RepoRoot 'servers\primary-node'
 $StreamDir = Join-Path $RepoRoot 'servers\streaming-node'
 $EdgeDir = Join-Path $RepoRoot 'servers\edge-py'
@@ -75,11 +76,12 @@ function Show-Menu {
     Write-Host "  ║ [1] Production Mode (Docker Up)                              ║" -ForegroundColor Cyan
     Write-Host "  ║ [2] Development Mode (Local Dev)                             ║" -ForegroundColor Cyan
     Write-Host "  ║ [3] Docker Build (All Services)                              ║" -ForegroundColor Cyan
-    Write-Host "  ║ [4] React Build (client)                                     ║" -ForegroundColor Cyan
-    Write-Host "  ║ [5] Primary Node Build (tsc)                                 ║" -ForegroundColor Cyan
-    Write-Host "  ║ [6] Streaming Node Build (tsc)                               ║" -ForegroundColor Cyan
-    Write-Host "  ║ [7] Build All (Primary + React + Streaming)                  ║" -ForegroundColor Cyan
-    Write-Host "  ║ [8] Exit                                                     ║" -ForegroundColor Cyan
+    Write-Host "  ║ [4] React Build (clients/react)                              ║" -ForegroundColor Cyan
+    Write-Host "  ║ [5] Angular Build (clients/angular)                          ║" -ForegroundColor Cyan
+    Write-Host "  ║ [6] Primary Node Build (tsc)                                 ║" -ForegroundColor Cyan
+    Write-Host "  ║ [7] Streaming Node Build (tsc)                               ║" -ForegroundColor Cyan
+    Write-Host "  ║ [8] Build All (Primary + React + Angular + Streaming)        ║" -ForegroundColor Cyan
+    Write-Host "  ║ [9] Exit                                                     ║" -ForegroundColor Cyan
     Write-Host "  ║                                                              ║" -ForegroundColor Cyan
     Write-Host "  ╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
@@ -89,10 +91,10 @@ function Get-UserChoice {
     do {
         Write-Host "  💡 " -NoNewline -ForegroundColor Yellow
         Write-Host "Enter your choice " -NoNewline -ForegroundColor White
-        Write-Host "(1-8): " -NoNewline -ForegroundColor Cyan
+        Write-Host "(1-9): " -NoNewline -ForegroundColor Cyan
         $choice = Read-Host
-        if ($choice -match '^[1-8]$') { return $choice }
-        Write-Host "  ❌ Invalid choice! Please enter 1-8." -ForegroundColor Red
+        if ($choice -match '^[1-9]$') { return $choice }
+        Write-Host "  ❌ Invalid choice! Please enter 1-9." -ForegroundColor Red
         Write-Host ""
     } while ($true)
 }
@@ -150,10 +152,10 @@ function Build-Docker {
 }
 
 function Build-React {
-    $clientDir = $ClientDir
-    try { Ensure-Dependencies $clientDir } catch { Write-Error $_; return $false }
+    $reactDir = $ReactDir
+    try { Ensure-Dependencies $reactDir } catch { Write-Error $_; return $false }
     Write-Info "Building React app..."
-    Push-Location $clientDir
+    Push-Location $reactDir
     try {
         npm run build
         if ($LASTEXITCODE -ne 0) { throw "npm run build failed." }
@@ -161,6 +163,22 @@ function Build-React {
         return $true
     } catch {
         Write-Error ("React build error: {0}" -f $_)
+        return $false
+    } finally { Pop-Location }
+}
+
+function Build-Angular {
+    $angularDir = $AngularDir
+    try { Ensure-Dependencies $angularDir } catch { Write-Error $_; return $false }
+    Write-Info "Building Angular app..."
+    Push-Location $angularDir
+    try {
+        npm run build
+        if ($LASTEXITCODE -ne 0) { throw "npm run build failed." }
+        Write-Success "Angular build successful (dist/client)."
+        return $true
+    } catch {
+        Write-Error ("Angular build error: {0}" -f $_)
         return $false
     } finally { Pop-Location }
 }
@@ -200,8 +218,9 @@ function Build-Streaming {
 function Build-All {
     $ok1 = Build-Primary
     $ok2 = Build-React
-    $ok3 = Build-Streaming
-    if ($ok1 -and $ok2 -and $ok3) {
+    $ok3 = Build-Angular
+    $ok4 = Build-Streaming
+    if ($ok1 -and $ok2 -and $ok3 -and $ok4) {
         Write-Success "All builds completed successfully."
         return $true
     }
@@ -248,10 +267,11 @@ function Start-Production {
     Write-Host ""
 
     Write-Info "APPLICATION URLS:"
-    Write-Host "     Frontend: " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:5000" -ForegroundColor Cyan
-    Write-Host "     API (Primary):  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4200" -ForegroundColor Cyan
-    Write-Host "     Edge (Python):  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:8000" -ForegroundColor Cyan
-    Write-Host "     Streaming:      " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4000" -ForegroundColor Cyan
+    Write-Host "     React Frontend:    " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:5000" -ForegroundColor Cyan
+    Write-Host "     Angular Frontend:  " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:5100" -ForegroundColor Cyan
+    Write-Host "     API (Primary):     " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4200" -ForegroundColor Cyan
+    Write-Host "     Edge (Python):     " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:8000" -ForegroundColor Cyan
+    Write-Host "     Streaming:         " -NoNewline -ForegroundColor DarkGray; Write-Host "http://localhost:4000" -ForegroundColor Cyan
     Write-Host ""
 
     Write-Info "Container Status:"
@@ -279,13 +299,13 @@ function Start-Development {
     if (-not (Test-Npm))  { Write-Error "npm is not installed or not on PATH."; return }
 
     $root = $RepoRoot
-    $clientDir = $ClientDir
     $primaryDir = $PrimaryDir
 
     # Ensure dependencies
     try {
         Ensure-Dependencies -Path $primaryDir
-        Ensure-Dependencies -Path $clientDir
+        Ensure-Dependencies -Path $ReactDir
+        Ensure-Dependencies -Path $AngularDir
     } catch {
         Write-Error $_; return
     }
@@ -301,15 +321,26 @@ function Start-Development {
     $primaryUrl  = if ($env:PRIMARY_BACKEND_URL) { $env:PRIMARY_BACKEND_URL } else { 'http://localhost:4200' }
     $deployedUrl = if ($env:DEPLOYED_BACKEND_URL) { $env:DEPLOYED_BACKEND_URL } else { 'http://localhost:4200' }
 
-    # Start Client (Vite dev on 5000)
-    Write-Info "Starting Client (http://localhost:5000)..."
-    Start-Process pwsh -WorkingDirectory $clientDir -ArgumentList '-NoExit','-Command','npm run dev' -Environment @{ PRIMARY_BACKEND_URL = $primaryUrl; DEPLOYED_BACKEND_URL = $deployedUrl } | Out-Null
+    # Start React Client (Vite dev on 5000)
+    Write-Info "Starting React Client (http://localhost:5000)..."
+    Start-Process pwsh -WorkingDirectory $ReactDir -ArgumentList '-NoExit','-Command','npm run dev -- --port 5000 --host 0.0.0.0' -Environment @{ PRIMARY_BACKEND_URL = $primaryUrl; DEPLOYED_BACKEND_URL = $deployedUrl } | Out-Null
+
+    Start-Sleep 1
+
+    # Start Angular Client (ng serve on 5100)
+    if (Test-Path (Join-Path $AngularDir 'package.json')) {
+        Write-Info "Starting Angular Client (http://localhost:5100)..."
+        $ngCommand = 'npx ng serve --port 5100 --host 0.0.0.0'
+        Start-Process pwsh -WorkingDirectory $AngularDir -ArgumentList '-NoExit','-Command', $ngCommand | Out-Null
+    } else {
+        Write-Warning "Angular package.json not found, skipping."
+    }
 
     Start-Sleep 1
 
     # Start Streaming Node (dev)
     if (Test-Path (Join-Path $StreamDir 'package.json')) {
-        Write-Info "Starting Streaming Backend (TypeScript, dev)..."
+        Write-Info "Starting Streaming Backend (TypeScript, dev)... (http://localhost:4000)"
         Start-Process pwsh -WorkingDirectory $StreamDir -ArgumentList '-NoExit','-Command','npm start' | Out-Null
     } else {
         Write-Warning "Streaming Node package.json not found, skipping."
@@ -342,21 +373,23 @@ switch -Regex ($Mode.ToLower()) {
     '^(dev|development)$'     { Start-Development; break }
     '^(docker-?build)$'       { Build-Docker | Out-Null; break }
     '^(react-?build|client-?build)$' { Build-React | Out-Null; break }
+    '^(angular-?build)$'      { Build-Angular | Out-Null; break }
     '^(primary-?build|api-?build|server-?build)$' { Build-Primary | Out-Null; break }
-    '^(build-?all)$'          { Build-All | Out-Null; break }
     '^(streaming-?build)$'     { Build-Streaming | Out-Null; break }
+    '^(build-?all)$'          { Build-All | Out-Null; break }
     default {
         Show-Menu
         $choice = Get-UserChoice
-        switch ($choice) {
+            switch ($choice) {
             '1' { Start-Production }
             '2' { Start-Development }
             '3' { Build-Docker | Out-Null }
             '4' { Build-React | Out-Null }
-            '5' { Build-Primary | Out-Null }
-            '6' { Build-Streaming | Out-Null }
-            '7' { Build-All | Out-Null }
-            '8' { Write-Info "Exiting..." }
+            '5' { Build-Angular | Out-Null }
+            '6' { Build-Primary | Out-Null }
+            '7' { Build-Streaming | Out-Null }
+            '8' { Build-All | Out-Null }
+            '9' { Write-Info "Exiting..." }
         }
     }
 }
