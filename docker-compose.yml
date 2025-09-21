@@ -17,9 +17,6 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      # Ensure to set this in your environment or compose overrides
-      - MONGODB_URI=${MONGODB_URI}
-      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "4000:4000"
     depends_on:

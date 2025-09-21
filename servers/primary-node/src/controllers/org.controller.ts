@@ -109,6 +109,7 @@ export const getInventory = async (
             name: m.name,
             type: m.type,
             qty,
+            price: m.price ?? 0,
             exp: m.exp,
             mfg: m.mfg,
           };

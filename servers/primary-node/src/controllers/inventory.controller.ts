@@ -40,6 +40,7 @@ export const addMedicine = async (
       desc,
       specialInstructions,
       handlingTemp,
+      price,
       exp, // Date or string
       mfg, // Date or string
     } = req.body as {
@@ -50,12 +51,18 @@ export const addMedicine = async (
       desc?: string;
       specialInstructions?: string;
       handlingTemp?: number;
+      price?: number;
       exp: string | Date;
       mfg: string | Date;
     };
 
     if (!barcodeNo || !name || !type || !qty || !exp || !mfg) {
       return res.status(400).json({ message: "barcodeNo, name, type, qty, exp, mfg are required" });
+    }
+
+    const unitPrice = Number(price ?? 0);
+    if (Number.isNaN(unitPrice) || unitPrice < 0) {
+      return res.status(400).json({ message: "price must be a non-negative number" });
     }
 
     const org = await Organization.findById(orgId);
@@ -96,6 +103,7 @@ export const addMedicine = async (
         name,
         type,
         qty: 0, // will recompute
+        price: unitPrice,
         desc: desc ?? null,
         exp: null,
         mfg: null,

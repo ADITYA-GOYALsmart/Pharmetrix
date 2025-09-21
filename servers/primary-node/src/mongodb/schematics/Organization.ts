@@ -32,6 +32,7 @@ export interface IMedicine extends Document {
   name: string;
   type: MedicineType;
   qty: number; // derived from non-discarded batches
+  price: number; // price per unit
   desc?: string;
   exp: Date | null; // earliest among batches
   mfg: Date | null; // average across batches
@@ -74,6 +75,7 @@ const MedicineSchema = new Schema<IMedicine>(
     name: { type: String, required: true },
     type: { type: String, enum: Object.values(MedicineType), required: true },
     qty: { type: Number, default: 0 }, // derived
+    price: { type: Number, default: 0, min: 0 },
     desc: { type: String, default: null },
     exp: { type: Date, default: null },
     mfg: { type: Date, default: null },

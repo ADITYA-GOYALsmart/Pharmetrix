@@ -42,7 +42,7 @@ const RootRedirect: React.FC = () => (
 
 const router = createBrowserRouter([
   { path: "/landed", element: <Landing /> }, // public landing page
-  { path: "/get-started", element: <GetStarted /> },
+  { path: "/get-started", element: <GetStarted /> }, // sign up
   { path: "/legal", element: <Legal /> },
   { path: "/support", element: <Support /> },
   { path: "/development", element: <Development /> },

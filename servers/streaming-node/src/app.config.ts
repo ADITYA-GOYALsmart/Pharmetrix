@@ -13,9 +13,9 @@ export const corsConfig = {
   ) => {
     const allowedOrigins = [
       `http://localhost:${process.env.CLIENT_PORT || 5173}`,
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:5000',
-      'https://thepharmetrix.netlify.app',
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5000",
+      "https://thepharmetrix.netlify.app",
     ];
 
     if (!origin || allowedOrigins.includes(origin)) {
@@ -27,7 +27,7 @@ export const corsConfig = {
   credentials: true,
 };
 
-export const backupPort = 4000;
+export const backupPort = 9000;
 
 export const jwtKey = process.env.JWT_SECRET as string;
 
