@@ -2,6 +2,9 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
+    "target": "ES2019",
+    "lib": ["ES2019"],
+    "downlevelIteration": true,
     "strict": true,
     "outDir": "./dist",
     "experimentalDecorators": true,
