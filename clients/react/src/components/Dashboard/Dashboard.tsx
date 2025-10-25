@@ -1,12 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
+import getUserInfo from '../../services/getuserinfo'
+
+type User = { fullName?: string }
 
 export default function Dashboard() {
-  const stored = useMemo(() => {
-    try { return JSON.parse(localStorage.getItem('authUser') || 'null') } catch { return null }
-  }, [])
-  const name = (stored?.fullName as string) || (stored?.email as string) || 'User'
-
+  const [user, setUser] = useState<User | null>(null)
   const [greeting, setGreeting] = useState('Hi')
+
+  useEffect(() => {
+    let mounted = true
+    getUserInfo()
+      .then((u: User) => { if (mounted) setUser(u) })
+      .catch(() => { console.error("Failed to fetch user info") })
+    return () => { mounted = false }
+  }, [])
+
   useEffect(() => {
     const h = new Date().getHours()
     if (h < 12) setGreeting('Good morning')
@@ -16,7 +24,8 @@ export default function Dashboard() {
 
   return (
     <main style={{ padding: '2rem' }}>
-      <h1>{greeting}, {name} 👋</h1>
+      <h1>{greeting}, {user?.fullName ?? 'User'} 👋</h1>
     </main>
   )
 }
+

@@ -1,0 +1,22 @@
+@use '../../colors.scss' as *;
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    height: 100%;
+    background: linear-gradient(90deg, $secondary, #29b5f692);
+
+    .sub{
+        height: 97%;
+        width: 95%;
+        background: linear-gradient(90deg, $background, #ffffff6b);
+        border-bottom-right-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    p{
+        padding: 0;
+        margin: 0;
+    }
+}
