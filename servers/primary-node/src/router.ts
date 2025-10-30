@@ -10,6 +10,7 @@ import { addMedicine, sellMedicine, discardBatch, markExpiredBatches } from "./c
 import { getStockSummary, getLowStock } from "./controllers/reports.controller";
 import { submitContact } from "./controllers/contact.controller";
 import { sendOtp, verifyOtp } from "./controllers/otp.controller";
+import { resetPassword } from "./controllers/reset.controller";
 
 export const router = express.Router();
 
@@ -32,6 +33,7 @@ router.get("/getuserinfo", sendUserInfo, authenticate, requireSelf);
 // OTP routes
 router.post('/otp/send', sendOtp);
 router.post('/otp/verify', verifyOtp);
+router.post('/user/reset-password', resetPassword);
 
 router.patch("/user/edit/:id", authenticate, requireSelf, updateUser); // takes updates via body and id for finding
 router.delete("/user/delete/:id", authenticate, requireSelf, deleteUser); // just id

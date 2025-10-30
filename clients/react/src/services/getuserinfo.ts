@@ -23,14 +23,22 @@ async function getUserInfo() {
       return;
     }
 
+    // Debug: log token presence (do not leak to production logs)
+    console.debug("getUserInfo using token:", token?.slice ? `${token.slice(0, 8)}...` : token);
+
     const res = await axios.get(`${API_URL}/getuserinfo`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     // console.log("user: ", res.data.user);
     // console.log("getUserInfo ",res.data)
     return res.data.user;
-  } catch (err) {
-    console.error(err);
+  } catch (err: any) {
+    // Provide more helpful debug information when available
+    if (err?.response) {
+      console.error("getUserInfo failed: ", err.response.status, err.response.data);
+    } else {
+      console.error(err);
+    }
     throw err;
   }
 }
