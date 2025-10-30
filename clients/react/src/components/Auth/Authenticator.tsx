@@ -5,16 +5,8 @@ import { isAuthenticated } from "../../services/session";
 import "./Authenticator.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { API_URL } from "../../services/env";
 
-// Compute backend base URL
-const API_URL = (() => {
-  const envUrl =
-    (import.meta.env.PRIMARY_BACKEND_URL as string | undefined) ??
-    "http://localhost:4200";
-  if (typeof window === "undefined") return envUrl;
-  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  return isLocal ? envUrl : "https://pharmetrix.onrender.com";
-})();
 
 export default function Authenticator() {
   const navigate = useNavigate();

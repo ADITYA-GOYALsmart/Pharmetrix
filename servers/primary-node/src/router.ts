@@ -14,7 +14,7 @@ import { sendOtp, verifyOtp } from "./controllers/otp.controller";
 export const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.status(200).send('Welcome to SPIS Primary Node Backend');
+  res.status(200).send('Welcome to Pharmetrix Primary Node.js Backend');
 });
 
 router.get('/ping', (req, res) => {
@@ -27,7 +27,7 @@ router.post('/contact', submitContact);
 router.post('/signup', signup);
 router.post('/login', login);
 router.get("/check-token", checkTokenExpiry);
-router.get("/getuserinfo", sendUserInfo);
+router.get("/getuserinfo", sendUserInfo, authenticate, requireSelf);
 
 // OTP routes
 router.post('/otp/send', sendOtp);

@@ -9,7 +9,7 @@ import { Navbar } from './components/navbar/navbar';
   imports: [RouterOutlet, MatSidenavModule, Sidebar, Navbar],
   template: `
     <mat-drawer-container class="container" autosize>
-      <mat-drawer class="sidenav" mode="over" [opened]="isDrawerOpen()">
+      <mat-drawer class="sidenav" mode="side" [opened]="isDrawerOpen()">
         <app-sidebar></app-sidebar>
       </mat-drawer>
 
