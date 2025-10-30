@@ -18,6 +18,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Authenticator from "./components/Auth/Authenticator";
 import NotFound from "./components/NotFound/NotFound";
 import { isAuthenticated } from "./services/session";
+import Streaming from "./components/Stream/Streaming";
 
 // Protected layout that centralizes auth check via session service
 const ProtectedLayout: React.FC = () => {
@@ -50,7 +51,11 @@ const router = createBrowserRouter([
   { path: "/", element: <RootRedirect /> }, // dynamic redirect based on auth
   {
     element: <ProtectedLayout />, // wrapper for protected routes
-    children: [{ path: "/dashboard", element: <Dashboard /> }],
+    children: [
+      { path: "/dashboard", element: <Dashboard /> },
+      // Created by Aditya Goyal for streaming page: Add route to access the live camera streaming page under protected routes
+      { path: "/streaming", element: <Streaming /> }
+    ],
   },
   { path: "*", element: <NotFound /> }, // public catch-all
 ]);
