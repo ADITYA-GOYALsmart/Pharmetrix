@@ -73,3 +73,8 @@ export function ensureAuthenticated(navigate: (path: string) => void) {
   }
   return result.isValid
 }
+
+export function logout() {
+  clearSession()
+  window.location.href = '/auth'
+}

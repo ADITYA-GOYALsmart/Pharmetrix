@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import getUserInfo from '../../services/getuserinfo'
+import { logout } from '../../services/session'
 
 type User = { fullName?: string }
 
@@ -25,6 +26,7 @@ export default function Dashboard() {
   return (
     <main style={{ padding: '2rem' }}>
       <h1>{greeting}, {user?.fullName ?? 'User'} 👋</h1>
+      <button onClick={() => logout()}>LogOut</button>
     </main>
   )
 }

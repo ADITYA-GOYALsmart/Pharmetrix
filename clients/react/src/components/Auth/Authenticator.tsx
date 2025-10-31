@@ -202,7 +202,7 @@ export default function Authenticator() {
                 className="inline-link"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate("/auth?reset=1");
+                  navigate("/resetpw");
                 }}
               >
                 Forgot password?
