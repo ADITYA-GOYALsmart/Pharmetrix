@@ -35,9 +35,10 @@ export const sendOtp = async (
 ) => {
   try {
     const { email } = req.body as { email?: string };
-    logInfo(`sendOtp called. email: ${email ?? "<missing>"}`);
+    const normalizedEmail = email ? email.trim().toLowerCase() : undefined;
+    logInfo(`sendOtp called. email: ${normalizedEmail ?? "<missing>"}`);
 
-    if (!email) {
+    if (!normalizedEmail) {
       logWarn("sendOtp aborted: Email not provided");
       res.status(400).json({ message: "Email is required" });
       return;
@@ -56,10 +57,10 @@ export const sendOtp = async (
       logWarn("Nodemailer transporter verification failed:", verifyErr?.message || verifyErr);
     }
 
-    const code = generate6DigitCode();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-    otpStore.set(email, { code, expiresAt });
-    logInfo(`OTP generated and stored. email: ${email}, expiresAt: ${new Date(expiresAt).toISOString()}`);
+  const code = generate6DigitCode();
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  otpStore.set(normalizedEmail, { code, expiresAt });
+  logInfo(`OTP generated and stored. email: ${normalizedEmail}, expiresAt: ${new Date(expiresAt).toISOString()}`);
 
     const html = `
       <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6;color:#111">
@@ -93,39 +94,67 @@ export const verifyOtp = async (
 ) => {
   try {
     const { email, code } = req.body as { email?: string; code?: string };
-    logInfo(`verifyOtp called. email: ${email ?? "<missing>"}`);
+    const normalizedEmail = email ? email.trim().toLowerCase() : undefined;
+    logInfo(`verifyOtp called. email: ${normalizedEmail ?? "<missing>"}`);
 
-    if (!email || !code) {
+    if (!normalizedEmail || !code) {
       logWarn("verifyOtp aborted: Email or code missing");
       res.status(400).json({ message: "Email and code are required" });
       return;
     }
 
-    const record = otpStore.get(email);
+    const record = otpStore.get(normalizedEmail);
     if (!record) {
-      logWarn("verifyOtp: No OTP found for email", email);
+      logWarn("verifyOtp: No OTP found for email", normalizedEmail);
       res.status(400).json({ message: "No OTP found for this email" });
       return;
     }
 
     if (Date.now() > record.expiresAt) {
-      otpStore.delete(email);
-      logWarn("verifyOtp: OTP expired for email", email);
+      otpStore.delete(normalizedEmail);
+      logWarn("verifyOtp: OTP expired for email", normalizedEmail);
       res.status(400).json({ message: "OTP expired" });
       return;
     }
 
     if (record.code !== code) {
-      logWarn("verifyOtp: Invalid OTP provided for email", email);
+      logWarn("verifyOtp: Invalid OTP provided for email", normalizedEmail);
       res.status(400).json({ message: "Invalid OTP" });
       return;
     }
 
-    otpStore.delete(email);
-    logInfo("verifyOtp: OTP verified successfully for email", email);
+    // Do NOT consume/delete the OTP here. keep it until the reset endpoint consumes it.
+    logInfo("verifyOtp: OTP validated for email", normalizedEmail);
     res.status(200).json({ message: "OTP verified" });
   } catch (err: any) {
     logError("verifyOtp error:", err?.message || err);
     res.status(500).json({ message: err?.message || "Failed to verify OTP" });
   }
 };
+
+// Helper to verify OTP programmatically from other controllers.
+// Throws an Error with a readable message when verification fails.
+export async function verifyOtpRecord(email?: string, code?: string) {
+  const normalizedEmail = email ? email.trim().toLowerCase() : undefined;
+  if (!normalizedEmail || !code) {
+    throw new Error("Email and code are required");
+  }
+
+  const record = otpStore.get(normalizedEmail);
+  if (!record) {
+    throw new Error("No OTP found for this email");
+  }
+
+  if (Date.now() > record.expiresAt) {
+    otpStore.delete(normalizedEmail);
+    throw new Error("OTP expired");
+  }
+
+  if (record.code !== code) {
+    throw new Error("Invalid OTP");
+  }
+
+  // Consume the OTP
+  otpStore.delete(normalizedEmail);
+  return true;
+}

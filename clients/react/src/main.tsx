@@ -19,6 +19,8 @@ import Authenticator from "./components/Auth/Authenticator";
 import NotFound from "./components/NotFound/NotFound";
 import { isAuthenticated } from "./services/session";
 import Streaming from "./components/Stream/Streaming";
+import ForgetPassword from "./components/ForgetPassword/ForgetPassword";
+import AppRoot from "./components/AppRoot/AppRoot";
 
 // Protected layout that centralizes auth check via session service
 const ProtectedLayout: React.FC = () => {
@@ -42,22 +44,29 @@ const RootRedirect: React.FC = () => (
 );
 
 const router = createBrowserRouter([
-  { path: "/landed", element: <Landing /> }, // public landing page
-  { path: "/get-started", element: <GetStarted /> }, // sign up
-  { path: "/legal", element: <Legal /> },
-  { path: "/support", element: <Support /> },
-  { path: "/development", element: <Development /> },
-  { path: "/auth", element: <Authenticator /> }, // public login
-  { path: "/", element: <RootRedirect /> }, // dynamic redirect based on auth
   {
-    element: <ProtectedLayout />, // wrapper for protected routes
+    element: <AppRoot />,
     children: [
-      { path: "/dashboard", element: <Dashboard /> },
-      // Created by Aditya Goyal for streaming page: Add route to access the live camera streaming page under protected routes
-      { path: "/streaming", element: <Streaming /> }
+      { path: "/landed", element: <Landing /> }, // public landing page
+      { path: "/get-started", element: <GetStarted /> }, // sign up
+      { path: "/legal", element: <Legal /> },
+      { path: "/support", element: <Support /> },
+      { path: "/development", element: <Development /> },
+      { path: "/auth", element: <Authenticator /> }, // public login
+      { path: "/", element: <RootRedirect /> }, // dynamic redirect based on auth
+      { path: "/resetpw", element: <ForgetPassword /> }, // public forget password page
+
+      {
+        element: <ProtectedLayout />, // wrapper for protected routes
+        children: [
+          { path: "/dashboard", element: <Dashboard /> },
+          // Created by Aditya Goyal for streaming page: Add route to access the live camera streaming page under protected routes
+          { path: "/streaming", element: <Streaming /> },
+        ],
+      },
+      { path: "*", element: <NotFound /> }, // public catch-all
     ],
   },
-  { path: "*", element: <NotFound /> }, // public catch-all
 ]);
 
 const container = document.getElementById("root");

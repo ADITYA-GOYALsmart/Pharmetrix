@@ -1,0 +1,48 @@
+.session-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 6px 20px rgba(2,6,23,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  z-index: 2000;
+  max-width: 920px;
+}
+
+.session-banner__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.session-banner__msg {
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.session-banner__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #1d4ed8;
+  color: white;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #333;
+}
