@@ -50,6 +50,14 @@ wss.on('connection', (ws, req) => {
         if (msg?.type === 'ping') {
           ws.send(JSON.stringify({ type: 'pong' }));
         }
+        // Handle toggleFeed message
+        if (msg?.toggleFeed !== undefined) {
+          if (msg.toggleFeed) {
+            streamManager.startFeed(piId);
+          } else {
+            streamManager.stopFeed(piId);
+          }
+        }
       } catch {
         // ignore malformed messages
       }
