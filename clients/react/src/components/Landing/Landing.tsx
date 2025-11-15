@@ -58,7 +58,7 @@ const uniquePoints = [
     letter: 'H',
     title: 'Extremely Low Cost',
     subtitle: '80–90% CHEAPER',
-    desc: 'Pharmetrix: ₹10,000–20,000. Competitors: ₹80,000–1.5 lakh. Enterprise automation at startup pricing.'
+    desc: 'Pharmetrix: ₹10,000–20,000. Others: ₹80,000–1.5 lakh. Enterprise automation at startup pricing.'
   },
 ]
 
@@ -208,7 +208,7 @@ export default function Landing() {
                   <div className="costSmall">Hardware + Setup</div>
                 </div>
                 <div className="costItem costAlt">
-                  <div className="costLabel">Competitors</div>
+                  <div className="costLabel">Others</div>
                   <div className="costPrice">₹80K–1.5L</div>
                   <div className="costSmall">Hardware + Software</div>
                 </div>
@@ -246,7 +246,7 @@ export default function Landing() {
         <section className="section uniquePoints" aria-labelledby="usp-title">
           <div className="container">
             <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={stagger}>
-              <motion.h2 id="usp-title" className="h2 sectionTitle" variants={fadeUp}>8 Unique Selling Points</motion.h2>
+              <motion.h2 id="usp-title" className="h2 sectionTitle" variants={fadeUp}>What Makes Us Better</motion.h2>
               <motion.p className="subhead" variants={fadeUp}>What sets Pharmetrix apart from the market.</motion.p>
             </motion.div>
             <div className="uspGrid">
