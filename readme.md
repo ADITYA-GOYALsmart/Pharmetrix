@@ -30,9 +30,9 @@ Pharmetrix is an end-to-end pharmaceutical inventory management ecosystem that b
 9. [Usage](#usage)
 10. [Legal Compliance & Safety](#legal-compliance--safety)
 11. [Pricing & Deployment Cost](#pricing--deployment-cost)
-12. [Roadmap & Future Scope](#roadmap--future-scope)
-13. [Development](#development)
-14. [License](#license)
+<!-- 12. [Roadmap & Future Scope](#roadmap--future-scope) -->
+12. [Development](#development)
+13. [License](#license)
 
 ---
 
@@ -595,7 +595,7 @@ Banned from Quick Sale. Requires:
 
 ---
 
-## Roadmap & Future Scope
+<!-- ## Roadmap & Future Scope
 
 ### Q1 2025
 - ✅ Core POS (Quick + Proper Sales)
@@ -624,7 +624,7 @@ Banned from Quick Sale. Requires:
 - [ ] Blockchain-based audit trail (for highly regulated facilities)
 - [ ] Integration with government regulatory databases (for recalls)
 
----
+--- -->
 
 ## Development
 
