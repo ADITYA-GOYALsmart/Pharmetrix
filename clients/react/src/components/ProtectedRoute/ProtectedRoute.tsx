@@ -4,7 +4,7 @@ import { useSession } from '../../context/SessionContext'
 
 export default function ProtectedRoute({ children }: { children: ReactElement }) {
   const navigate = useNavigate()
-  const { isSessionValid, validateSession, handleSessionInvalid } = useSession()
+  const { isSessionValid, validateSession } = useSession()
 
   useEffect(() => {
     validateSession()

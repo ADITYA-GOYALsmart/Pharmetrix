@@ -52,4 +52,4 @@ export default function ProtectedRoute({ children }: { children: ReactElement })
 
   if (allowed === null) return null // loading state
   return children
-}}
+}
