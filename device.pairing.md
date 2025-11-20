@@ -136,6 +136,44 @@ Pi should:
 * Display success in the UI.
 * Kick off the heartbeat scheduler.
 
+### Pi Fallback Polling Loop (5s Interval)
+
+After sending the initial POST `/device/pair`, the Pi MUST start a background
+status-polling loop to ensure reliable pairing, even when the cloud cannot
+perform a LAN callback due to NAT/firewalls.
+
+**Pi → Cloud (every 5 seconds):**
+
+`GET https://pharmetrix.onrender.com/device/pair/status?pairingId=<PAIRING_ID>`
+
+
+**Cloud may return:**
+- `PENDING_ADMIN_APPROVAL` → Admin hasn’t approved yet  
+- `APPROVED_PENDING_CALLBACK` → Admin approved; cloud trying callback  
+- `APPROVED_AWAITING_POLL` → Callback failed; Pi must finalize pairing  
+- `ACTIVE` → Pairing completed  
+
+---
+
+### Pi Behavior on Poll Response
+When Pi receives either:
+
+- `ACTIVE`  
+**or**
+- `APPROVED_AWAITING_POLL`  
+
+the Pi must immediately:
+
+1. Persist `deviceToken`, `orgId`, `deviceId`  
+2. Mark device status as `ACTIVE`  
+3. Start heartbeat scheduler  
+4. Start sensor/camera pipelines  
+5. Update dashboard UI → “Pairing Successful”  
+6. Stop polling loop  
+
+This ensures the device pairs successfully **even when callback ACK cannot reach the Pi**, making the onboarding workflow firewall-proof and enterprise-safe.
+
+
 ---
 
 ### 4) Heartbeat (FastAPI → Cloud)
@@ -173,6 +211,7 @@ Cloud should validate token, update device lastSeen, and raise alerts if heartbe
 ```
 
 Cloud stores the first sensor snapshot and verifies data path integrity.
+
 
 ---
 
