@@ -1,6 +1,7 @@
 import './Landing.scss'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { usePageSEO } from '../../hooks/usePageSEO'
 
 const features = [
   { title: 'Dual-Mode POS', desc: 'Quick Sale for OTC, Proper Sale for Rx. Instant pricing, full compliance, optional SMS receipts.' },
@@ -85,6 +86,14 @@ const fadeInScale = {
 }
 
 export default function Landing() {
+  usePageSEO({
+    title: 'Pharmetrix - Smart Pharmacy Management & Inventory System',
+    description: 'Unified IoT + cloud platform for pharmaceutical inventory management. Real-time temperature monitoring, dual-mode POS, FEFO batch management, camera integration & compliance automation. 80-90% cheaper than enterprise solutions.',
+    keywords: 'pharmacy management, pharmaceutical inventory system, cold-chain monitoring, POS system, FEFO management, pharmacy software, IoT pharmacy solution, medication inventory',
+    ogUrl: 'https://pharmetrix.onrender.com/',
+    canonical: 'https://pharmetrix.onrender.com/',
+  })
+
   return (
     <>
       {/* Header */}
@@ -391,50 +400,49 @@ export default function Landing() {
       <footer id="footer" className="footer" role="contentinfo">
         <div className="container footerGrid">
           <div className="footerBrand">
-            <img className="footerLogo" src="/title-subtitle-logo.png" alt="Pharmetrix logo" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-            {/* <span className="brandName">Pharmetrix</span> */}
-            <p className="muted">Unified hardware + software for pharmaceutical automation.</p>
+            <img className="footerLogo" src="/title-subtitle-logo.png" alt="Pharmetrix - Smart Pharmacy Management System" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <p className="muted">Unified hardware + software for pharmaceutical automation. Smart inventory management, real-time monitoring, and compliance at 80-90% lower cost.</p>
           </div>
 
-          <nav aria-label="Product">
+          <nav aria-label="Product Navigation">
             <h3 className="footerHeading">Product</h3>
-            <ul className="footerList">
-              <li><a href="#why">Why Pharmetrix</a></li>
-              <li><a href="#features">Features</a></li>
-              <li><a href="#compliance">Compliance</a></li>
-              <li><Link to="/get-started">Get Started</Link></li>
+            <ul className="footerList" role="list">
+              <li role="listitem"><a href="#why" title="Learn why choose Pharmetrix">Why Pharmetrix</a></li>
+              <li role="listitem"><a href="#features" title="Explore Pharmetrix features">Features</a></li>
+              <li role="listitem"><a href="#compliance" title="View compliance information">Compliance</a></li>
+              <li role="listitem"><Link to="/get-started" title="Start using Pharmetrix">Get Started</Link></li>
             </ul>
           </nav>
 
-          <nav aria-label="Company">
+          <nav aria-label="Company Navigation">
             <h3 className="footerHeading">Development</h3>
-            <ul className="footerList">
-              <li><Link to="/development">About Dev</Link></li>
-              <li><Link to="/development">About Pharmetrix</Link></li>
-              <li><Link to="/development">Contact</Link></li>
+            <ul className="footerList" role="list">
+              <li role="listitem"><Link to="/development" title="About development">About Dev</Link></li>
+              <li role="listitem"><Link to="/development" title="Learn about Pharmetrix">About Pharmetrix</Link></li>
+              <li role="listitem"><Link to="/development" title="Contact us">Contact</Link></li>
             </ul>
           </nav>
 
-          <nav aria-label="Support">
+          <nav aria-label="Support Navigation">
             <h3 className="footerHeading">Support</h3>
-            <ul className="footerList">
-              <li><Link to="/support">Docs</Link></li>
-              <li><Link to="/support">Guides</Link></li>
-              <li><Link to="/support">Status</Link></li>
+            <ul className="footerList" role="list">
+              <li role="listitem"><Link to="/support" title="Read documentation">Docs</Link></li>
+              <li role="listitem"><Link to="/support" title="Access guides">Guides</Link></li>
+              <li role="listitem"><Link to="/support" title="Check system status">Status</Link></li>
             </ul>
           </nav>
 
-          <nav aria-label="Legal">
+          <nav aria-label="Legal Navigation">
             <h3 className="footerHeading">Legal</h3>
-            <ul className="footerList">
-              <li><Link to="/legal">Terms</Link></li>
-              <li><Link to="/legal">Privacy</Link></li>
-              <li><Link to="/legal">Security</Link></li>
+            <ul className="footerList" role="list">
+              <li role="listitem"><Link to="/legal" title="Read terms of service">Terms</Link></li>
+              <li role="listitem"><Link to="/legal" title="Read privacy policy">Privacy</Link></li>
+              <li role="listitem"><Link to="/legal" title="View security information">Security</Link></li>
             </ul>
           </nav>
         </div>
         <div className="copy">
-          Copyright © {new Date().getFullYear()} Pharmetrix by Prakhar Tripathi. All rights reserved.
+          <p>Copyright © {new Date().getFullYear()} Pharmetrix by Prakhar Tripathi. All rights reserved.</p>
         </div>
       </footer>
     </>
