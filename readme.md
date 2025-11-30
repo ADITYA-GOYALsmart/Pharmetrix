@@ -1,4 +1,4 @@
-# Pharmetrix – Smart Pharmaceutical Inventory Management System
+# Pharmetrix – Smart Pharmaceutical Inventory & Sales Management System with Cold Chain IoT
 
 <p align="center">
   <img src="clients/react/public/title-subtitle-logo.png" alt="Pharmetrix" width="720" />

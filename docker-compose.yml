@@ -1,60 +1,45 @@
 services:
-  primary-node:
+  nodejs-GCS:
     build:
-      context: ./servers/primary-node
+      context: ./servers/nodejs-GCS
       dockerfile: dockerfile
-    container_name: pharmetrix-primary-node
+    container_name: pharmetrix-nodejs-GCS
     environment:
       - NODE_ENV=production
       - PORT=4200
     ports:
       - "4200:4200"
 
-  streaming-node:
+  fastapi-ODECS:
     build:
-      context: ./servers/streaming-node
-    container_name: pharmetrix-streaming-node
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-    ports:
-      - "4000:4000"
-    depends_on:
-      - primary-node
-
-  edge-py:
-    build:
-      context: ./servers/edge-py
+      context: ./servers/fastapi-ODECS
       dockerfile: dockerfile
-    container_name: pharmetrix-edge-py
+    container_name: pharmetrix-fastapi-ODECS
     environment:
       - PORT=8000
       - CORS_ALLOWED_ORIGINS=*
     ports:
       - "8000:8000"
 
-  react-client:
+  react-global:
     build:
-      context: ./clients/react
+      context: ./clients/react-global
       dockerfile: Dockerfile
-    container_name: pharmetrix-react-client
+    container_name: pharmetrix-react-global
     ports:
       - "5000:80"
     depends_on:
-      - primary-node
-      - streaming-node
-      - edge-py
+      - nodejs-GCS
 
-  angular-client:
+  react-ODEMC:
     build:
-      context: ./clients/angular
+      context: ./clients/react-ODEMC
       dockerfile: Dockerfile
-    container_name: pharmetrix-angular-client
+    container_name: pharmetrix-react-ODEMC
     ports:
       - "5001:80"
     depends_on:
-      - primary-node
-      - streaming-node
-      - edge-py
+      - nodejs-GCS
+      - fastapi-ODECS
 
 # Optional networks/volumes can be added as needed

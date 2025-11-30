@@ -1,0 +1,122 @@
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(var(--text-tertiary-color-rgb, 136, 136, 136), 0.2);
+  width: 100%;
+  
+  &-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color, #646cff);
+    margin-right: 2rem;
+    
+    span {
+      background: linear-gradient(90deg, var(--primary-color, #646cff), var(--secondary-color, #42b883));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+  
+  &-links {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+    
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-color, #333);
+      font-weight: 500;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: color 0.3s ease;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--primary-color, #646cff);
+        transition: width 0.3s ease;
+      }
+      
+      &:hover {
+        color: var(--primary-color, #646cff);
+        
+        &::after {
+          width: 100%;
+        }
+      }
+      
+      &.active {
+        color: var(--primary-color, #646cff);
+        font-weight: 600;
+        
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+  }
+  
+  .theme-toggle {
+    &-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      background-color: var(--primary-color, #646cff);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      
+      .toggle-icon {
+        font-size: 1rem;
+      }
+      
+      .toggle-text {
+        font-size: 0.9rem;
+      }
+      
+      &:hover {
+        background-color: var(--primary-hover-color, #535bf2);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+    
+    &-brand {
+      margin-bottom: 1rem;
+    }
+    
+    &-links {
+      order: 3;
+      width: 100%;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+    
+    .theme-toggle {
+      order: 2;
+    }
+  }
+}
